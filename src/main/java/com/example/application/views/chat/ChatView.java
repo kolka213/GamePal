@@ -1,5 +1,6 @@
 package com.example.application.views.chat;
 
+import com.example.application.security.SecurityService;
 import com.example.application.views.MainLayout;
 import com.vaadin.collaborationengine.CollaborationMessageInput;
 import com.vaadin.collaborationengine.CollaborationMessageList;
@@ -9,13 +10,18 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import java.util.UUID;
+
+import javax.annotation.security.PermitAll;
 
 @PageTitle("Chat")
 @Route(value = "", layout = MainLayout.class)
+@PermitAll
 public class ChatView extends VerticalLayout {
 
-    public ChatView() {
+    private final SecurityService securityService;
+
+    public ChatView(SecurityService securityService) {
+        this.securityService = securityService;
         addClassName("chat-view");
         setSpacing(false);
         // UserInfo is used by Collaboration Engine and is used to share details
@@ -24,7 +30,7 @@ public class ChatView extends VerticalLayout {
         // identifier, and the user's real name. You can also provide the users
         // avatar by passing an url to the image as a third parameter, or by
         // configuring an `ImageProvider` to `avatarGroup`.
-        UserInfo userInfo = new UserInfo(UUID.randomUUID().toString(), "Steve Lange");
+        UserInfo userInfo = new UserInfo(securityService.getAuthenticatedUser().toString(), securityService.getAuthenticatedUser().getUsername());
 
         // Tabs allow us to change chat rooms.
         Tabs tabs = new Tabs(new Tab("#general"), new Tab("#support"), new Tab("#casual"));
