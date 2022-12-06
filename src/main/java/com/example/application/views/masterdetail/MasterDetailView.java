@@ -2,6 +2,7 @@ package com.example.application.views.masterdetail;
 
 import com.example.application.data.entity.SamplePerson;
 import com.example.application.data.service.SamplePersonService;
+import com.example.application.security.SecurityService;
 import com.example.application.views.MainLayout;
 import com.vaadin.collaborationengine.CollaborationAvatarGroup;
 import com.vaadin.collaborationengine.CollaborationBinder;
@@ -28,14 +29,17 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
-import java.util.Optional;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+
+import javax.annotation.security.PermitAll;
+import java.util.Optional;
+import java.util.UUID;
 
 @PageTitle("Master Detail")
 @Route(value = "persons/:samplePersonID?/:action?(edit)", layout = MainLayout.class)
 @Uses(Icon.class)
+@PermitAll
 public class MasterDetailView extends Div implements BeforeEnterObserver {
 
     private final String SAMPLEPERSON_ID = "samplePersonID";
@@ -61,10 +65,13 @@ public class MasterDetailView extends Div implements BeforeEnterObserver {
     private SamplePerson samplePerson;
 
     private final SamplePersonService samplePersonService;
+    @org.springframework.lang.NonNull
+    private final SecurityService securityService;
 
     @Autowired
-    public MasterDetailView(SamplePersonService samplePersonService) {
+    public MasterDetailView(SamplePersonService samplePersonService, SecurityService securityService) {
         this.samplePersonService = samplePersonService;
+        this.securityService = securityService;
         addClassNames("master-detail-view");
 
         // UserInfo is used by Collaboration Engine and is used to share details
@@ -73,7 +80,7 @@ public class MasterDetailView extends Div implements BeforeEnterObserver {
         // identifier, and the user's real name. You can also provide the users
         // avatar by passing an url to the image as a third parameter, or by
         // configuring an `ImageProvider` to `avatarGroup`.
-        UserInfo userInfo = new UserInfo(UUID.randomUUID().toString(), "Steve Lange");
+        UserInfo userInfo = new UserInfo(securityService.getAuthenticatedUser().toString(), securityService.getAuthenticatedUser().getUsername());
 
         // Create UI
         SplitLayout splitLayout = new SplitLayout();
