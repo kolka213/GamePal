@@ -30,7 +30,8 @@ public class ChatView extends VerticalLayout {
         // identifier, and the user's real name. You can also provide the users
         // avatar by passing an url to the image as a third parameter, or by
         // configuring an `ImageProvider` to `avatarGroup`.
-        UserInfo userInfo = new UserInfo(String.valueOf(securityService.getAuthenticatedUser().hashCode()), securityService.getAuthenticatedUser().getUsername());
+        UserInfo userInfo = new UserInfo(String.valueOf(securityService.getAuthenticatedUser().hashCode()),
+                securityService.getAuthenticatedUser().getUsername());
 
         // Tabs allow us to change chat rooms.
         Tabs tabs = new Tabs(new Tab("#general"), new Tab("#support"), new Tab("#casual"));
