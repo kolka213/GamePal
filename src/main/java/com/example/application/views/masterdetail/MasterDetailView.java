@@ -80,7 +80,7 @@ public class MasterDetailView extends Div implements BeforeEnterObserver {
         // identifier, and the user's real name. You can also provide the users
         // avatar by passing an url to the image as a third parameter, or by
         // configuring an `ImageProvider` to `avatarGroup`.
-        UserInfo userInfo = new UserInfo(securityService.getAuthenticatedUser().toString(), securityService.getAuthenticatedUser().getUsername());
+        UserInfo userInfo = new UserInfo(String.valueOf(securityService.getAuthenticatedUser().hashCode()), securityService.getAuthenticatedUser().getUsername());
 
         // Create UI
         SplitLayout splitLayout = new SplitLayout();
