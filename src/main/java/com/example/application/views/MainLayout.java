@@ -5,6 +5,7 @@ import com.example.application.components.appnav.AppNav;
 import com.example.application.components.appnav.AppNavItem;
 import com.example.application.security.SecurityService;
 import com.example.application.views.chat.ChatView;
+import com.example.application.views.map.MapView;
 import com.example.application.views.masterdetail.MasterDetailView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -63,6 +64,7 @@ public class MainLayout extends AppLayout {
 
         nav.addItem(new AppNavItem("Chat", ChatView.class, "la la-comments"));
         nav.addItem(new AppNavItem("Master Detail", MasterDetailView.class, "la la-columns"));
+        nav.addItem(new AppNavItem("Map View", MapView.class, "la la-columns"));
 
         return nav;
     }

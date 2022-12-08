@@ -98,3 +98,4 @@ insert into sample_person(id,first_name,last_name,email,phone,date_of_birth,occu
 insert into sample_person(id,first_name,last_name,email,phone,date_of_birth,occupation,important) values ('f8f02699-e05b-46e7-8185-52dbaebf77de','Earl','Giovannoni','earl.giovannoni@lojet.ge','(433) 862-3076','1986-12-10','Auto Service Station Attendant',false)
 insert into sample_person(id,first_name,last_name,email,phone,date_of_birth,occupation,important) values ('1d8b7cf4-c7d1-4c5b-b782-4b31f6951d91','Helen','Zanieri','helen.zanieri@ukve.tn','(619) 506-4452','1968-04-23','Healthcare Social Worker',false)
 insert into sample_person(id,first_name,last_name,email,phone,date_of_birth,occupation,important) values ('f6f0e684-40e2-4131-b3bc-70e7bc4edb6e','Agnes','Toccafondi','agnes.toccafondi@viipo.ae','(616) 688-6883','1970-05-13','Comedian',false)
+insert into map_game(id) values ('f6f0e684-40e2-4131-b3bc-70e7bc4edb6b')
