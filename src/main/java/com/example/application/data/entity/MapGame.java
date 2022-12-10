@@ -1,31 +1,37 @@
 package com.example.application.data.entity;
 
-import org.springframework.security.core.userdetails.UserDetails;
-
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class MapGame extends AbstractEntity{
+public class MapGame extends AbstractEntity {
 
-    @ElementCollection
-    private List<UserDetails> players;
+    @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+    @Column(name = "players")
+    private List<String> players = new ArrayList<>();
 
 
     public MapGame() {
 
     }
 
-    public MapGame(List<UserDetails> players) {
+    public MapGame(List<String> players) {
         this.players = players;
     }
 
-    public List<UserDetails> getPlayers() {
+    public List<String> getPlayers() {
         return players;
     }
 
-    public void setPlayers(List<UserDetails> players) {
-        this.players = players;
+    public void addPlayers(String... player) {
+        this.players.addAll(List.of(player));
+    }
+
+    public void removePlayer(String... player){
+        this.players.removeAll(List.of(player));
     }
 }
