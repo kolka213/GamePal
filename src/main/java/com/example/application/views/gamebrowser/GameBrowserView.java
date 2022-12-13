@@ -5,6 +5,8 @@ import com.example.application.data.entity.MapGame;
 import com.example.application.data.service.MapGameService;
 import com.example.application.security.SecurityService;
 import com.example.application.views.MainLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -32,10 +34,12 @@ public class GameBrowserView extends VerticalLayout {
 
     private void initComponents() {
         List<MapGame> allGames = mapGameService.getAll();
-        for (int i = 0; i < allGames.size(); i++) {
-            MapGame mapGame = allGames.get(i);
-            add(new Card(i, mapGame, mapGame.getPlayers().size()));
+        for (MapGame mapGame : allGames) {
+            add(new Card(mapGameService, mapGame, mapGame.getPlayers().size()));
         }
         setPadding(true);
+
+        addComponentAsFirst(new Button("New Game", VaadinIcon.PLUS_CIRCLE_O.create(), buttonClickEvent ->
+                new EditSession(mapGameService).open()));
     }
 }

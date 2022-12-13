@@ -39,4 +39,8 @@ public class MapGameService {
         mapGame.removePlayer(players);
         save(mapGame);
     }
+
+    public void delete(MapGame game){
+        repository.delete(game);
+    }
 }

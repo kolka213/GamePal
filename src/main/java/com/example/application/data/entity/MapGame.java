@@ -14,13 +14,24 @@ public class MapGame extends AbstractEntity {
     @Column(name = "players")
     private List<String> players = new ArrayList<>();
 
+    @Column(name = "game_name")
+    private String gameName;
+
+    @Column(name = "private")
+    private boolean isPrivate;
+
+    @Column(name = "max_player_count")
+    private Integer maxPLayerCount;
+
 
     public MapGame() {
-
     }
 
-    public MapGame(List<String> players) {
+    public MapGame(List<String> players, String gameName, boolean isPrivate, Integer maxPLayerCount) {
         this.players = players;
+        this.gameName = gameName;
+        this.isPrivate = isPrivate;
+        this.maxPLayerCount = maxPLayerCount;
     }
 
     public List<String> getPlayers() {
@@ -33,5 +44,29 @@ public class MapGame extends AbstractEntity {
 
     public void removePlayer(String... player){
         this.players.removeAll(List.of(player));
+    }
+
+    public String getGameName() {
+        return gameName;
+    }
+
+    public void setGameName(String gameName) {
+        this.gameName = gameName;
+    }
+
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
+    public void setPrivate(boolean aPrivate) {
+        isPrivate = aPrivate;
+    }
+
+    public Integer getMaxPLayerCount() {
+        return maxPLayerCount;
+    }
+
+    public void setMaxPLayerCount(Integer maxPLayerCount) {
+        this.maxPLayerCount = maxPLayerCount;
     }
 }
