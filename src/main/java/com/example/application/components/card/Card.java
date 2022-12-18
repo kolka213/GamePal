@@ -1,6 +1,7 @@
 package com.example.application.components.card;
 
 import com.example.application.data.entity.MapGame;
+import com.example.application.data.entity.Players;
 import com.example.application.data.service.MapGameService;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.AvatarGroup;
@@ -40,8 +41,8 @@ public class Card extends VerticalLayout {
         var avatarGroup = new AvatarGroup();
         avatarGroup.setMaxItemsVisible(10);
         int colorIdx = 0;
-        for (String player : mapGame.getPlayers()) {
-            AvatarGroup.AvatarGroupItem avatarGroupItem = new AvatarGroup.AvatarGroupItem(player);
+        for (Players player : mapGame.getPlayers()) {
+            AvatarGroup.AvatarGroupItem avatarGroupItem = new AvatarGroup.AvatarGroupItem(player.getPlayer());
             avatarGroupItem.setColorIndex(colorIdx++);
             avatarGroup.add(avatarGroupItem);
         }

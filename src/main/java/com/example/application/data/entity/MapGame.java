@@ -1,18 +1,12 @@
 package com.example.application.data.entity;
 
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import java.util.ArrayList;
+import javax.persistence.OneToMany;
 import java.util.List;
 
 @Entity
 public class MapGame extends AbstractEntity {
-
-    @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
-    @Column(name = "players")
-    private List<String> players = new ArrayList<>();
 
     @Column(name = "game_name")
     private String gameName;
@@ -23,27 +17,30 @@ public class MapGame extends AbstractEntity {
     @Column(name = "max_player_count")
     private Integer maxPLayerCount;
 
+    @OneToMany(mappedBy = "mapGame")
+    private List<Players> players;
+
 
     public MapGame() {
     }
 
-    public MapGame(List<String> players, String gameName, boolean isPrivate, Integer maxPLayerCount) {
+    public MapGame(List<Players> players, String gameName, boolean isPrivate, Integer maxPLayerCount) {
         this.players = players;
         this.gameName = gameName;
         this.isPrivate = isPrivate;
         this.maxPLayerCount = maxPLayerCount;
     }
 
-    public List<String> getPlayers() {
+    public List<Players> getPlayers() {
         return players;
     }
 
-    public void addPlayers(String... player) {
-        this.players.addAll(List.of(player));
+    public void addPlayers(Players player) {
+        this.players.add(player);
     }
 
-    public void removePlayer(String... player){
-        this.players.removeAll(List.of(player));
+    public void removePlayer(Players player){
+        this.players.remove(player);
     }
 
     public String getGameName() {
@@ -68,5 +65,9 @@ public class MapGame extends AbstractEntity {
 
     public void setMaxPLayerCount(Integer maxPLayerCount) {
         this.maxPLayerCount = maxPLayerCount;
+    }
+
+    public void setPlayers(List<Players> players) {
+        this.players = players;
     }
 }

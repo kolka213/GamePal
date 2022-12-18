@@ -1,7 +1,9 @@
 package com.example.application.views.map;
 
 import com.example.application.data.entity.MapGame;
+import com.example.application.data.entity.Players;
 import com.example.application.data.service.MapGameService;
+import com.example.application.data.service.PlayersService;
 import com.example.application.security.SecurityService;
 import com.example.application.views.MainLayout;
 import com.example.application.views.gamebrowser.GameBrowserView;
@@ -21,9 +23,12 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.*;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.annotation.security.PermitAll;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,6 +39,7 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
 
     private final SecurityService securityService;
     private final MapGameService mapGameService;
+    private final PlayersService playersService;
     private Map map;
     private CollaborationBinder<MapGame> binder;
 
@@ -47,15 +53,27 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
 
     private UserInfo userInfo;
 
-    public MapView(SecurityService securityService, MapGameService mapGameService) {
+    private Players player;
+
+    private MapGame mapGame;
+
+    private List<Players> opponentPlayers;
+
+    private HashMap<String, MarkerFeature> playerPositions;
+
+
+    public MapView(SecurityService securityService, MapGameService mapGameService, PlayersService playersService) {
         this.securityService = securityService;
         this.mapGameService = mapGameService;
+        this.playersService = playersService;
+        this.playerPositions = new HashMap<>();
         initGame();
         addClassName("chat-view");
     }
 
     private void initGame(){
         map = new Map();
+
         var splitLayout = new SplitLayout();
         splitLayout.addToPrimary(map);
         splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);
@@ -65,7 +83,6 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
         userInfo = new UserInfo(String.valueOf(securityService.getAuthenticatedUser().hashCode()), null);
         avatarGroup = new CollaborationAvatarGroup(userInfo, null);
         binder = new CollaborationBinder<>(MapGame.class, userInfo);
-
 
         list = new CollaborationMessageList(userInfo, null);
 
@@ -97,9 +114,14 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
     private void setEventListeners(){
         map.addClickEventListener(mapClickEvent -> {
             if (mapClickEvent.getFeatures().isEmpty()) {
-                if (!map.getFeatureLayer().getFeatures().isEmpty()) map.getFeatureLayer().removeFeature(map.getFeatureLayer().getFeatures().get(0));
+                if (!map.getFeatureLayer().getFeatures().isEmpty()) map.getFeatureLayer().removeFeature(
+                        playerPositions.get(userInfo.getName()));
 
-                map.getFeatureLayer().addFeature(new MarkerFeature(mapClickEvent.getCoordinate()));
+                player.setCoordinate(mapClickEvent.getCoordinate());
+                playersService.update(player);
+                playerPositions.put(userInfo.getName(), new MarkerFeature(mapClickEvent.getCoordinate()));
+
+                map.getFeatureLayer().addFeature(playerPositions.get(userInfo.getName() ));
             }
             else {
                 var tooltipDialog = getTooltipDialog(mapClickEvent.getCoordinate());
@@ -148,6 +170,29 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
         return dialog;
     }
 
+    @Scheduled(fixedRate = 1000)
+    public void fetchOpponentMarkers() {
+        if (mapGame != null) {
+            opponentPlayers = playersService.fetchAllPlayersFromGame(mapGame)
+                    .stream()
+                    .filter(players -> !players.getPlayer().equals(userInfo.getName()))
+                    .toList();
+            addOpponentMarkersToMap();
+        }
+    }
+
+    private void addOpponentMarkersToMap(){
+        if (opponentPlayers != null){
+            opponentPlayers
+                    .stream()
+                    .filter(opponentPlayer -> opponentPlayer.getCoordinate() != null)
+                    .forEachOrdered(opponentPlayer -> map.getUI()
+                            .ifPresent(ui -> ui.access(() -> {
+                                map.getFeatureLayer().addFeature(new MarkerFeature(opponentPlayer.getCoordinate()));
+                            })));
+        }
+    }
+
     @Override
     public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
         UserDetails user = securityService.getAuthenticatedUser();
@@ -155,25 +200,27 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
         if (mapGameID.isPresent()){
             Optional<MapGame> mapGame = mapGameService.get(mapGameID.get());
             mapGame.ifPresentOrElse(game -> {
-                mapGameService.addPlayer(game, user.getUsername());
+                player = playersService.save(user.getUsername(), null, game);
+                mapGameService.addPlayer(game, player);
                 userInfo.setName(user.getUsername());
                 this.gameId = game.getId();
+                this.mapGame = game;
+                playerPositions.put(userInfo.getName(), null);
 
-                String topic = mapGameID.get().toString();
+                String topic = gameId.toString();
                 avatarGroup.setTopic(topic);
-                binder.setTopic(topic, mapGame::get);
+                binder.setTopic(topic, () -> game);
                 list.setTopic(topic);
             }, () -> noGameFoundDialog().open());
         }
         else {
             noGameFoundDialog().open();
         }
-
     }
 
     @Override
     public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
         Optional<MapGame> mapGame = mapGameService.get(gameId);
-        mapGame.ifPresent(game -> mapGameService.removePlayer(game, userInfo.getName()));
+        mapGame.ifPresent(game -> mapGameService.removePlayer(game, player));
     }
 }

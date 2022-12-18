@@ -1,7 +1,9 @@
 package com.example.application.data.service;
 
 import com.example.application.data.entity.MapGame;
+import com.example.application.data.entity.Players;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,9 +15,15 @@ public class MapGameService {
 
     private final MapGameRepository repository;
 
+    private final PlayersService playersService;
+
+    private final ApplicationEventPublisher eventPublisher;
+
     @Autowired
-    public MapGameService(MapGameRepository repository) {
+    public MapGameService(MapGameRepository repository, PlayersService playersService, ApplicationEventPublisher eventPublisher) {
         this.repository = repository;
+        this.playersService = playersService;
+        this.eventPublisher = eventPublisher;
     }
 
     public void save(MapGame mapGame){
@@ -30,13 +38,14 @@ public class MapGameService {
         return repository.findAll();
     }
 
-    public void addPlayer(MapGame mapGame, String... players){
-        mapGame.addPlayers(players);
+    public void addPlayer(MapGame mapGame, Players player){
+        mapGame.addPlayers(player);
         save(mapGame);
     }
 
-    public void removePlayer(MapGame mapGame, String... players){
-        mapGame.removePlayer(players);
+    public void removePlayer(MapGame mapGame, Players player){
+        playersService.delete(player);
+        mapGame.removePlayer(player);
         save(mapGame);
     }
 

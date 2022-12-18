@@ -17,7 +17,9 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
@@ -35,6 +37,8 @@ public class GameBrowserView extends VerticalLayout {
 
     private List<MapGame> allGames;
 
+    private VerticalLayout verticalLayout;
+
     private final String user;
 
     public GameBrowserView(SecurityService securityService, MapGameService mapGameService) {
@@ -43,11 +47,41 @@ public class GameBrowserView extends VerticalLayout {
         this.user = securityService.getAuthenticatedUser().getUsername();
         allGames = new ArrayList<>();
 
+        initComponents();
+    }
+
+
+    private void initComponents(){
+        var topButtonLayout = new HorizontalLayout();
+        topButtonLayout.setWidthFull();
+        topButtonLayout.setJustifyContentMode(JustifyContentMode.BETWEEN);
+        topButtonLayout.setPadding(false);
+
+        var newGameButton = new Button("New Game", VaadinIcon.PLUS_CIRCLE_O.create(), buttonClickEvent -> {
+            EditSession editSession = new EditSession(mapGameService);
+            editSession.open();
+            editSession.addDetachListener(detachEvent -> refresh());
+        });
+
+        var refreshButton = new Button(VaadinIcon.REFRESH.create(), buttonClickEvent -> refresh());
+        refreshButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
+        Tooltip.forComponent(refreshButton).setText("Refresh");
+
+        setAlignSelf(Alignment.END, refreshButton);
+
+        verticalLayout = new VerticalLayout();
+
+        topButtonLayout.add(newGameButton, refreshButton);
+
+        add(topButtonLayout, verticalLayout);
+
         refresh();
     }
 
-    private void refresh() {
-        removeAll();
+    public void refresh() {
+        verticalLayout.removeAll();
+        verticalLayout.setPadding(true);
+
         allGames = mapGameService.getAll();
         for (MapGame mapGame : allGames) {
             Card card = new Card(mapGameService, mapGame, mapGame.getPlayers().size());
@@ -72,20 +106,12 @@ public class GameBrowserView extends VerticalLayout {
                 confirmDialog.setConfirmButtonTheme(ButtonVariant.LUMO_ERROR.getVariantName());
                 confirmDialog.setCancelable(true);
                 confirmDialog.open();
-
             });
 
             card.getJoinLayout().addComponentAsFirst(settings);
 
-            add(card);
+            verticalLayout.add(card);
         }
-        setPadding(true);
-
-        addComponentAsFirst(new Button("New Game", VaadinIcon.PLUS_CIRCLE_O.create(), buttonClickEvent -> {
-            EditSession editSession = new EditSession(mapGameService);
-            editSession.open();
-            editSession.addDetachListener(detachEvent -> refresh());
-        }));
     }
 
     private MenuItem createIconItem(HasMenuItems menu, VaadinIcon iconName,
