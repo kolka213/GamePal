@@ -114,8 +114,9 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
     private void setEventListeners(){
         map.addClickEventListener(mapClickEvent -> {
             if (mapClickEvent.getFeatures().isEmpty()) {
-                if (!map.getFeatureLayer().getFeatures().isEmpty()) map.getFeatureLayer().removeFeature(
-                        playerPositions.get(userInfo.getName()));
+                if (!map.getFeatureLayer().getFeatures().isEmpty() && playerPositions.get(userInfo.getName()) != null) {
+                    map.getFeatureLayer().removeFeature(playerPositions.get(userInfo.getName()));
+                }
 
                 player.setCoordinate(mapClickEvent.getCoordinate());
                 playersService.update(player);
@@ -183,13 +184,16 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
 
     private void addOpponentMarkersToMap(){
         if (opponentPlayers != null){
-            opponentPlayers
-                    .stream()
+            opponentPlayers.stream()
                     .filter(opponentPlayer -> opponentPlayer.getCoordinate() != null)
-                    .forEachOrdered(opponentPlayer -> map.getUI()
-                            .ifPresent(ui -> ui.access(() -> {
-                                map.getFeatureLayer().addFeature(new MarkerFeature(opponentPlayer.getCoordinate()));
-                            })));
+                    .forEach(opponentPlayer -> map.getUI()
+                    .ifPresent(ui -> ui.access(() -> {
+                        if (playerPositions.containsKey(opponentPlayer.getPlayer())) {
+                            map.getFeatureLayer().removeFeature(playerPositions.get(opponentPlayer.getPlayer()));
+                        }
+                        playerPositions.put(opponentPlayer.getPlayer(), new MarkerFeature(opponentPlayer.getCoordinate()));
+                        map.getFeatureLayer().addFeature(playerPositions.get(opponentPlayer.getPlayer()));
+                    })));
         }
     }
 
