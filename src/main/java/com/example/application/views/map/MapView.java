@@ -27,10 +27,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.annotation.security.PermitAll;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @PageTitle("Map")
 @Route(value = "map/:mapGameID?", layout = MainLayout.class)
@@ -184,6 +182,8 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
 
     private void addOpponentMarkersToMap(){
         if (opponentPlayers != null){
+            clearPlayersFromMapWhoLeft();
+
             opponentPlayers.stream()
                     .filter(opponentPlayer -> opponentPlayer.getCoordinate() != null)
                     .forEach(opponentPlayer -> map.getUI()
@@ -195,6 +195,19 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
                         map.getFeatureLayer().addFeature(playerPositions.get(opponentPlayer.getPlayer()));
                     })));
         }
+    }
+
+    private void clearPlayersFromMapWhoLeft(){
+        Set<String> playerNames = opponentPlayers.stream().map(Players::getPlayer).collect(Collectors.toSet());
+        Set<String> keysNotInPlayers = playerPositions
+                .keySet()
+                .stream()
+                .filter(key -> !playerNames.contains(key))
+                .collect(Collectors.toSet());
+
+        keysNotInPlayers.forEach(key -> map.getUI().ifPresent(ui -> ui.access(() -> {
+            if (!key.equals(userInfo.getName())) map.getFeatureLayer().removeFeature(playerPositions.get(key));
+        })));
     }
 
     @Override
