@@ -8,7 +8,7 @@ public class CoordinateHelper {
     static double lon1; // longitude of first coordinate
     static double lat2; // latitude of second coordinate
     static double lon2; // longitude of second coordinate
-    private static final double earthRadius = 6371; // radius of Earth in kilometers
+    static final double earthRadius = 6371; // radius of Earth in kilometers
 
 
     public static double measureDistanceBetweenTwoPoints(Coordinate point1, Coordinate point2){

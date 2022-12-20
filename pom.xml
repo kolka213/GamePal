@@ -10,8 +10,8 @@
     <packaging>jar</packaging>
 
     <properties>
-        <java.version>11</java.version>
-        <vaadin.version>23.3.0.beta1</vaadin.version>
+        <java.version>17</java.version>
+        <vaadin.version>23.3.0</vaadin.version>
         <!-- this parameter is needed as spring-boot bom overwrites it -->
         <selenium.version>4.5.3</selenium.version>
     </properties>
@@ -148,10 +148,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+            <version>2.7.6</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+            <version>2.7.6</version>
         </dependency>
     </dependencies>
 

@@ -1,5 +1,6 @@
 package com.example.application.views.map;
 
+import com.example.application.components.custommarker.CustomMarker;
 import com.example.application.data.entity.MapGame;
 import com.example.application.data.entity.Players;
 import com.example.application.data.service.MapGameService;
@@ -11,6 +12,7 @@ import com.vaadin.collaborationengine.*;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H5;
@@ -118,21 +120,27 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
 
                 player.setCoordinate(mapClickEvent.getCoordinate());
                 playersService.update(player);
-                playerPositions.put(userInfo.getName(), new MarkerFeature(mapClickEvent.getCoordinate()));
+                playerPositions.put(userInfo.getName(), new CustomMarker(mapClickEvent.getCoordinate(), userInfo.getName(),
+                        MarkerFeature.PIN_ICON));
 
                 map.getFeatureLayer().addFeature(playerPositions.get(userInfo.getName() ));
             }
-            else {
-                var tooltipDialog = getTooltipDialog(mapClickEvent.getCoordinate());
-                tooltipDialog.open();
-            }
+        });
+        map.addFeatureClickListener(mapFeatureClickEvent -> {
+            CustomMarker feature = (CustomMarker) mapFeatureClickEvent.getFeature();
+            var tooltipDialog = getTooltipDialog(feature.getCoordinates(), feature.getUserName());
+            tooltipDialog.open();
         });
     }
 
-    private Dialog getTooltipDialog(Coordinate coordinate){
+    private Dialog getTooltipDialog(Coordinate coordinate, String userName){
         var tooltipDialog = new Dialog();
-        tooltipDialog.setHeaderTitle("Marker");
-        tooltipDialog.getHeader().add(new Button(VaadinIcon.CLOSE_BIG.create(), buttonClickEvent -> tooltipDialog.close()));
+
+        Button closeButton = new Button(VaadinIcon.CLOSE_BIG.create(), buttonClickEvent -> tooltipDialog.close());
+        closeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+
+        tooltipDialog.setHeaderTitle(String.format("%s's Marker", userName));
+        tooltipDialog.getHeader().add(closeButton);
         tooltipDialog.setCloseOnEsc(false);
         tooltipDialog.setCloseOnOutsideClick(false);
 
@@ -191,7 +199,8 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
                         if (playerPositions.containsKey(opponentPlayer.getPlayer())) {
                             map.getFeatureLayer().removeFeature(playerPositions.get(opponentPlayer.getPlayer()));
                         }
-                        playerPositions.put(opponentPlayer.getPlayer(), new MarkerFeature(opponentPlayer.getCoordinate()));
+                        playerPositions.put(opponentPlayer.getPlayer(), new CustomMarker(opponentPlayer.getCoordinate(),
+                                opponentPlayer.getPlayer(), MarkerFeature.POINT_ICON));
                         map.getFeatureLayer().addFeature(playerPositions.get(opponentPlayer.getPlayer()));
                     })));
         }
