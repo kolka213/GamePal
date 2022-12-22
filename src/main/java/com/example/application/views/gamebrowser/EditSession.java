@@ -1,6 +1,7 @@
 package com.example.application.views.gamebrowser;
 
 import com.example.application.data.entity.MapGame;
+import com.example.application.data.service.CapitalCityService;
 import com.example.application.data.service.MapGameService;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
@@ -26,18 +27,21 @@ public class EditSession extends Dialog {
     private Checkbox isPrivateCheckbox;
 
     private final MapGameService gameService;
+    private final CapitalCityService capitalCityService;
     private MapGame game;
 
 
-    public EditSession(MapGameService gameService, MapGame mapGame) {
+    public EditSession(MapGameService gameService, CapitalCityService capitalCityService, MapGame mapGame) {
         this.gameService = gameService;
+        this.capitalCityService = capitalCityService;
         this.game = mapGame;
         initComponents();
         setHeaderTitle("Edit Game");
     }
 
-    public EditSession(MapGameService gameService){
+    public EditSession(MapGameService gameService, CapitalCityService capitalCityService){
         this.gameService = gameService;
+        this.capitalCityService = capitalCityService;
         initComponents();
         setHeaderTitle("Create Game");
     }
@@ -82,6 +86,7 @@ public class EditSession extends Dialog {
 
         var saveButton = new Button("Save", VaadinIcon.CHECK_CIRCLE.create(), buttonClickEvent -> {
             try {
+                game.setCapitalCity(capitalCityService.getRandomCapitalCity());
                 binder.writeBean(game);
                 gameService.save(binder.getBean());
                 notification.setText("Game created successfully");

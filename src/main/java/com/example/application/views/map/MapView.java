@@ -188,6 +188,7 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
         }
     }
 
+
     private void addOpponentMarkersToMap(){
         if (opponentPlayers != null){
             clearPlayersFromMapWhoLeft();

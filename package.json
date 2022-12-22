@@ -215,7 +215,6 @@
     "@vaadin/vaadin-list-mixin": "$@vaadin/vaadin-list-mixin",
     "@vaadin/vaadin-login": "$@vaadin/vaadin-login",
     "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
-    "@vaadin/vaadin-material-styles": "$@vaadin/vaadin-material-styles",
     "@vaadin/vaadin-menu-bar": "$@vaadin/vaadin-menu-bar",
     "@vaadin/vaadin-messages": "$@vaadin/vaadin-messages",
     "@vaadin/vaadin-notification": "$@vaadin/vaadin-notification",
@@ -261,7 +260,8 @@
     "@vaadin/tabsheet": "$@vaadin/tabsheet",
     "@vaadin/tooltip": "$@vaadin/tooltip",
     "line-awesome": "$line-awesome",
-    "@vaadin-component-factory/vcf-nav": "$@vaadin-component-factory/vcf-nav"
+    "@vaadin-component-factory/vcf-nav": "$@vaadin-component-factory/vcf-nav",
+    "@vaadin/vaadin-material-styles": "$@vaadin/vaadin-material-styles"
   },
   "vaadin": {
     "dependencies": {

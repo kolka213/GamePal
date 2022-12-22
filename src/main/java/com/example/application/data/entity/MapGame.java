@@ -1,8 +1,6 @@
 package com.example.application.data.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.List;
 
 @Entity
@@ -19,6 +17,10 @@ public class MapGame extends AbstractEntity {
 
     @OneToMany(mappedBy = "mapGame")
     private List<Players> players;
+
+    @ManyToOne
+    @JoinColumn(name = "capital__id")
+    private CapitalCity capitalCity;
 
 
     public MapGame() {
@@ -69,5 +71,13 @@ public class MapGame extends AbstractEntity {
 
     public void setPlayers(List<Players> players) {
         this.players = players;
+    }
+
+    public CapitalCity getCapitalCity() {
+        return capitalCity;
+    }
+
+    public void setCapitalCity(CapitalCity capitalCity) {
+        this.capitalCity = capitalCity;
     }
 }

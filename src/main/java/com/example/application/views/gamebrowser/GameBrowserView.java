@@ -2,6 +2,7 @@ package com.example.application.views.gamebrowser;
 
 import com.example.application.components.card.Card;
 import com.example.application.data.entity.MapGame;
+import com.example.application.data.service.CapitalCityService;
 import com.example.application.data.service.MapGameService;
 import com.example.application.security.SecurityService;
 import com.example.application.views.MainLayout;
@@ -34,6 +35,8 @@ public class GameBrowserView extends VerticalLayout {
 
     private final SecurityService securityService;
     private final MapGameService mapGameService;
+    private final CapitalCityService cityService;
+
 
     private List<MapGame> allGames;
 
@@ -41,10 +44,11 @@ public class GameBrowserView extends VerticalLayout {
 
     private final String user;
 
-    public GameBrowserView(SecurityService securityService, MapGameService mapGameService) {
+    public GameBrowserView(SecurityService securityService, MapGameService mapGameService, CapitalCityService cityService) {
         this.securityService = securityService;
         this.mapGameService = mapGameService;
         this.user = securityService.getAuthenticatedUser().getUsername();
+        this.cityService = cityService;
         allGames = new ArrayList<>();
 
         initComponents();
@@ -58,7 +62,7 @@ public class GameBrowserView extends VerticalLayout {
         topButtonLayout.setPadding(false);
 
         var newGameButton = new Button("New Game", VaadinIcon.PLUS_CIRCLE_O.create(), buttonClickEvent -> {
-            EditSession editSession = new EditSession(mapGameService);
+            EditSession editSession = new EditSession(mapGameService, cityService);
             editSession.open();
             editSession.addDetachListener(detachEvent -> refresh());
         });
@@ -93,7 +97,7 @@ public class GameBrowserView extends VerticalLayout {
             var subMenu = cogWheel.getSubMenu();
 
             createIconItem(subMenu, VaadinIcon.EDIT, "Edit", "", true, menuItemClickEvent -> {
-                EditSession editSession = new EditSession(mapGameService, mapGame);
+                EditSession editSession = new EditSession(mapGameService, cityService, mapGame);
                 editSession.open();
                 editSession.addDetachListener(detachEvent -> refresh());
             });

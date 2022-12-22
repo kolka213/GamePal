@@ -5,10 +5,9 @@ import com.example.application.data.entity.Players;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class PlayersService {
@@ -37,13 +36,8 @@ public class PlayersService {
         repository.delete(player);
     }
 
-    public HashMap<String, Coordinate> getAll(){
-        HashMap<String, Coordinate> map = repository.findAll()
-                .stream()
-                .collect(Collectors.toMap(Players::getPlayer, Players::getCoordinate, (a, b) -> b, HashMap::new));
-        return map;
-    }
 
+    @Transactional(readOnly = true)
     public List<Players> fetchAllPlayersFromGame(MapGame mapGame){
         return repository.findAllByMapGame(mapGame);
     }
