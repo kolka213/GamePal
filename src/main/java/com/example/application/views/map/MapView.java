@@ -1,10 +1,12 @@
 package com.example.application.views.map;
 
 import com.example.application.components.custommarker.CustomMarker;
+import com.example.application.data.entity.CapitalCity;
 import com.example.application.data.entity.MapGame;
 import com.example.application.data.entity.Players;
 import com.example.application.data.service.MapGameService;
 import com.example.application.data.service.PlayersService;
+import com.example.application.helper.CoordinateHelper;
 import com.example.application.security.SecurityService;
 import com.example.application.views.MainLayout;
 import com.example.application.views.gamebrowser.GameBrowserView;
@@ -61,6 +63,10 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
 
     private HashMap<String, MarkerFeature> playerPositions;
 
+    private CustomMarker cityFeature;
+
+    private State state = State.RUNNING;
+
 
     public MapView(SecurityService securityService, MapGameService mapGameService, PlayersService playersService) {
         this.securityService = securityService;
@@ -112,20 +118,23 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
     }
 
     private void setEventListeners(){
-        map.addClickEventListener(mapClickEvent -> {
-            if (mapClickEvent.getFeatures().isEmpty()) {
-                if (!map.getFeatureLayer().getFeatures().isEmpty() && playerPositions.get(userInfo.getName()) != null) {
-                    map.getFeatureLayer().removeFeature(playerPositions.get(userInfo.getName()));
+        if (state.equals(State.RUNNING)){
+            map.addClickEventListener(mapClickEvent -> {
+                if (mapClickEvent.getFeatures().isEmpty()) {
+                    if (!map.getFeatureLayer().getFeatures().isEmpty() && playerPositions.get(userInfo.getName()) != null) {
+                        map.getFeatureLayer().removeFeature(playerPositions.get(userInfo.getName()));
+                    }
+
+                    player.setCoordinate(mapClickEvent.getCoordinate());
+                    playersService.update(player);
+                    playerPositions.put(userInfo.getName(), new CustomMarker(mapClickEvent.getCoordinate(), userInfo.getName(),
+                            MarkerFeature.PIN_ICON));
+
+                    map.getFeatureLayer().addFeature(playerPositions.get(userInfo.getName() ));
                 }
+            });
+        }
 
-                player.setCoordinate(mapClickEvent.getCoordinate());
-                playersService.update(player);
-                playerPositions.put(userInfo.getName(), new CustomMarker(mapClickEvent.getCoordinate(), userInfo.getName(),
-                        MarkerFeature.PIN_ICON));
-
-                map.getFeatureLayer().addFeature(playerPositions.get(userInfo.getName() ));
-            }
-        });
         map.addFeatureClickListener(mapFeatureClickEvent -> {
             CustomMarker feature = (CustomMarker) mapFeatureClickEvent.getFeature();
             var tooltipDialog = getTooltipDialog(feature.getCoordinates(), feature.getUserName());
@@ -178,33 +187,78 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
     }
 
     @Scheduled(fixedRate = 1000)
-    public void fetchOpponentMarkers() {
+    public void gameCycle(){
         if (mapGame != null) {
-            opponentPlayers = playersService.fetchAllPlayersFromGame(mapGame)
-                    .stream()
-                    .filter(players -> !players.getPlayer().equals(userInfo.getName()))
-                    .toList();
-            addOpponentMarkersToMap();
+            fetchOpponentMarkers();
+
+            if (opponentPlayers != null){
+                clearPlayersFromMapWhoLeft();
+                addOpponentMarkersToMap();
+                waitForAllPlayerTurns();
+            }
+        }
+
+    }
+
+    public void fetchOpponentMarkers() {
+        opponentPlayers = playersService.fetchAllPlayersFromGame(mapGame)
+                .stream()
+                .filter(players -> !players.getPlayer().equals(userInfo.getName()))
+                .toList();
+
+    }
+
+    private void waitForAllPlayerTurns() {
+        if (playerPositions.size() > 1){
+            boolean noNullValues = playerPositions.values().stream().noneMatch(Objects::isNull);
+            if (noNullValues) {
+                putResultMarkerOnMap();
+                state = State.FINISHED;
+            }
         }
     }
 
-
-    private void addOpponentMarkersToMap(){
-        if (opponentPlayers != null){
-            clearPlayersFromMapWhoLeft();
-
-            opponentPlayers.stream()
-                    .filter(opponentPlayer -> opponentPlayer.getCoordinate() != null)
-                    .forEach(opponentPlayer -> map.getUI()
-                    .ifPresent(ui -> ui.access(() -> {
-                        if (playerPositions.containsKey(opponentPlayer.getPlayer())) {
-                            map.getFeatureLayer().removeFeature(playerPositions.get(opponentPlayer.getPlayer()));
-                        }
-                        playerPositions.put(opponentPlayer.getPlayer(), new CustomMarker(opponentPlayer.getCoordinate(),
-                                opponentPlayer.getPlayer(), MarkerFeature.POINT_ICON));
-                        map.getFeatureLayer().addFeature(playerPositions.get(opponentPlayer.getPlayer()));
-                    })));
+    private void putResultMarkerOnMap(){
+        if (Objects.requireNonNull(state) == State.RUNNING) {
+            CapitalCity city = mapGame.getCapitalCity();
+            Coordinate coordinates = new Coordinate(city.getLongitude(), city.getLatitude());
+            cityFeature = new CustomMarker(coordinates, city.getName(), MarkerFeature.PIN_ICON);
+            map.getUI().ifPresent(ui -> ui.access(() -> map.getFeatureLayer().addFeature(cityFeature)));
+            calculateWinnerOfRound();
         }
+    }
+
+    private void calculateWinnerOfRound() {
+        CapitalCity city = mapGame.getCapitalCity();
+        Coordinate cityCoordinates = new Coordinate(city.getLongitude(), city.getLatitude());
+
+        HashMap<Players, Double> resultsList = new HashMap<>();
+        resultsList.put(player, CoordinateHelper.measureDistanceBetweenTwoPoints(cityCoordinates,
+                player.getCoordinate()));
+
+        opponentPlayers.forEach(players -> {
+            resultsList.put(players, CoordinateHelper.measureDistanceBetweenTwoPoints(cityCoordinates,
+                    players.getCoordinate()));
+        });
+
+        Collection<Double> values = resultsList.values();
+
+    }
+
+
+    private void addOpponentMarkersToMap() {
+        opponentPlayers.stream()
+                .filter(opponentPlayer -> opponentPlayer.getCoordinate() != null)
+                .forEach(opponentPlayer -> map.getUI()
+                        .ifPresent(ui -> ui.access(() -> {
+                            if (playerPositions.containsKey(opponentPlayer.getPlayer())) {
+                                map.getFeatureLayer().removeFeature(playerPositions.get(opponentPlayer.getPlayer()));
+                            }
+                            playerPositions.put(opponentPlayer.getPlayer(), new CustomMarker(opponentPlayer.getCoordinate(),
+                                    opponentPlayer.getPlayer(), MarkerFeature.POINT_ICON));
+                            map.getFeatureLayer().addFeature(playerPositions.get(opponentPlayer.getPlayer()));
+                        })));
+
     }
 
     private void clearPlayersFromMapWhoLeft(){
@@ -249,5 +303,10 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
     public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
         Optional<MapGame> mapGame = mapGameService.get(gameId);
         mapGame.ifPresent(game -> mapGameService.removePlayer(game, player));
+    }
+
+    private enum State{
+        RUNNING,
+        FINISHED
     }
 }

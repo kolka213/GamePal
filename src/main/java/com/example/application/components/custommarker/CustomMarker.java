@@ -13,6 +13,10 @@ public class CustomMarker extends MarkerFeature {
         this.userName = userName;
     }
 
+    public CustomMarker() {
+
+    }
+
     public String getUserName() {
         return userName;
     }

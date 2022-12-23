@@ -11,7 +11,7 @@ public class CoordinateHelper {
     static final double earthRadius = 6371; // radius of Earth in kilometers
 
 
-    public static double measureDistanceBetweenTwoPoints(Coordinate point1, Coordinate point2){
+    public static Double measureDistanceBetweenTwoPoints(Coordinate point1, Coordinate point2){
         lat1 = point1.getY();
         lon1 = point1.getX();
 
