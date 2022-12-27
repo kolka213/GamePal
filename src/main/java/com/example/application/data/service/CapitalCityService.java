@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -21,10 +22,14 @@ public class CapitalCityService {
     }
 
     @Transactional(readOnly = true)
-    public CapitalCity getRandomCapitalCity(){
+    public List<CapitalCity> getRandomCapitalCities(){
         List<CapitalCity> capitalCities = repository.findAll();
-        int size = capitalCities.size();
-        int randomIndex = random.nextInt(size);
-        return capitalCities.get(randomIndex);
+        Collections.shuffle(capitalCities);
+        return capitalCities;
+    }
+
+    @Transactional(readOnly = true)
+    public CapitalCity findCityByName(String cityName){
+        return repository.findCapitalCityByName(cityName);
     }
 }

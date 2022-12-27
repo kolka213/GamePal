@@ -1,8 +1,11 @@
 package com.example.application.views.gamebrowser;
 
+import com.example.application.data.entity.CapitalCity;
 import com.example.application.data.entity.MapGame;
 import com.example.application.data.service.CapitalCityService;
 import com.example.application.data.service.MapGameService;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -18,6 +21,8 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.ValueChangeMode;
+
+import java.util.List;
 
 public class EditSession extends Dialog {
     private TextField nameField;
@@ -56,6 +61,7 @@ public class EditSession extends Dialog {
         nameField.setValueChangeMode(ValueChangeMode.EAGER);
         nameField.setRequired(true);
         nameField.setRequiredIndicatorVisible(true);
+        nameField.focus();
 
         playerCountField = new IntegerField("Max. Player Count:");
         playerCountField.setValue(2);
@@ -77,7 +83,7 @@ public class EditSession extends Dialog {
         var binder = new Binder<>(MapGame.class);
         binder.forField(nameField).withValidator(s -> !s.isBlank(), "Cannot be empty")
                 .bind(MapGame::getGameName, MapGame::setGameName);
-        binder.forField(playerCountField).withValidator(integer -> integer > 1, "At least 2 players required")
+        binder.forField(playerCountField).withValidator(integer -> integer >= 2, "At least 2 players required")
                 .bind(MapGame::getMaxPLayerCount, MapGame::setMaxPLayerCount);
         binder.forField(isPrivateCheckbox).bind(MapGame::isPrivate, MapGame::setPrivate);
         binder.setBean(game);
@@ -86,12 +92,16 @@ public class EditSession extends Dialog {
 
         var saveButton = new Button("Save", VaadinIcon.CHECK_CIRCLE.create(), buttonClickEvent -> {
             try {
-                game.setCapitalCity(capitalCityService.getRandomCapitalCity());
+                List<CapitalCity> capitalCities = capitalCityService.getRandomCapitalCities();
+                game.setCapitalCities(capitalCities);
+                game.setGameCapitalCity(capitalCities.get(0));
+
                 binder.writeBean(game);
                 gameService.save(binder.getBean());
                 notification.setText("Game created successfully");
                 notification.open();
                 close();
+                UI.getCurrent().navigate("map/"+game.getId());
             } catch (Exception e) {
                 notification.setText("Something went wrong");
                 notification.open();
@@ -100,6 +110,7 @@ public class EditSession extends Dialog {
         });
         saveButton.setEnabled(false);
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        saveButton.addClickShortcut(Key.ENTER);
 
         binder.addStatusChangeListener(statusChangeEvent -> saveButton.setEnabled(!statusChangeEvent.hasValidationErrors()
         && !nameField.getValue().isBlank()));

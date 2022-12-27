@@ -10,9 +10,8 @@ public class CapitalCity extends AbstractEntity {
     private double latitude;
     private double longitude;
 
-    @OneToMany(mappedBy = "capitalCity")
-    private Collection<MapGame> mapGames;
-
+    @OneToMany(mappedBy = "gameCapitalCity")
+    private Collection<MapGame> mapGame;
 
     public CapitalCity(String name, double latitude, double longitude) {
         this.name = name;
@@ -46,11 +45,12 @@ public class CapitalCity extends AbstractEntity {
         this.longitude = longitude;
     }
 
-    public Collection<MapGame> getMapGames() {
-        return mapGames;
+
+    public Collection<MapGame> getMapGame() {
+        return mapGame;
     }
 
-    public void setMapGames(Collection<MapGame> mapGames) {
-        this.mapGames = mapGames;
+    public void setMapGame(Collection<MapGame> mapGame) {
+        this.mapGame = mapGame;
     }
 }
