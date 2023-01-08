@@ -10,16 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Entity
-public class MapGame extends AbstractEntity {
-
-    @Column(name = "game_name")
-    private String gameName;
-
-    @Column(name = "private")
-    private boolean isPrivate;
-
-    @Column(name = "max_player_count")
-    private Integer maxPLayerCount;
+public class MapGame extends Game {
 
     @OneToMany(mappedBy = "mapGame")
     private List<Players> players;
@@ -35,13 +26,6 @@ public class MapGame extends AbstractEntity {
     public MapGame() {
     }
 
-    public MapGame(List<Players> players, String gameName, boolean isPrivate, Integer maxPLayerCount) {
-        this.players = players;
-        this.gameName = gameName;
-        this.isPrivate = isPrivate;
-        this.maxPLayerCount = maxPLayerCount;
-    }
-
     public List<Players> getPlayers() {
         return players;
     }
@@ -52,30 +36,6 @@ public class MapGame extends AbstractEntity {
 
     public void removePlayer(Players player){
         this.players.remove(player);
-    }
-
-    public String getGameName() {
-        return gameName;
-    }
-
-    public void setGameName(String gameName) {
-        this.gameName = gameName;
-    }
-
-    public boolean isPrivate() {
-        return isPrivate;
-    }
-
-    public void setPrivate(boolean aPrivate) {
-        isPrivate = aPrivate;
-    }
-
-    public Integer getMaxPLayerCount() {
-        return maxPLayerCount;
-    }
-
-    public void setMaxPLayerCount(Integer maxPLayerCount) {
-        this.maxPLayerCount = maxPLayerCount;
     }
 
     public void setPlayers(List<Players> players) {
@@ -100,4 +60,5 @@ public class MapGame extends AbstractEntity {
     public void setGameCapitalCity(CapitalCity gameCapitalCity) {
         this.gameCapitalCity = gameCapitalCity;
     }
+
 }

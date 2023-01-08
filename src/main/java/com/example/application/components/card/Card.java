@@ -1,7 +1,9 @@
 package com.example.application.components.card;
 
+import com.example.application.data.entity.GuessingGame;
 import com.example.application.data.entity.MapGame;
 import com.example.application.data.entity.Players;
+import com.example.application.data.service.GuessingGameService;
 import com.example.application.data.service.MapGameService;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.AvatarGroup;
@@ -17,17 +19,28 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 public class Card extends VerticalLayout {
 
-    private final MapGameService gameService;
+    private MapGameService gameService;
+    private GuessingGameService guessingGameService;
     private MapGame mapGame;
+
+    private GuessingGame guessingGame;
     private int size;
 
     private HorizontalLayout joinLayout;
+
 
     private static String MAP_ROUTE_PREFIX = "map/";
 
     public Card(MapGameService gameService, MapGame mapGame, int size) {
         this.gameService = gameService;
         this.mapGame = mapGame;
+        this.size = size;
+        initComponents();
+    }
+
+    public Card(GuessingGameService guessingGameService, GuessingGame guessingGame, int size) {
+        this.guessingGameService = guessingGameService;
+        this.guessingGame = guessingGame;
         this.size = size;
         initComponents();
     }

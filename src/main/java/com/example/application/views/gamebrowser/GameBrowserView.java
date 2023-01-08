@@ -1,10 +1,12 @@
 package com.example.application.views.gamebrowser;
 
 import com.example.application.components.card.Card;
+import com.example.application.data.entity.GuessingGame;
 import com.example.application.data.entity.MapGame;
 import com.example.application.data.service.CapitalCityService;
+import com.example.application.data.service.GuessingGameService;
 import com.example.application.data.service.MapGameService;
-import com.example.application.security.SecurityService;
+import com.example.application.data.service.WordsService;
 import com.example.application.views.MainLayout;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -33,23 +35,26 @@ import java.util.List;
 @PermitAll
 public class GameBrowserView extends VerticalLayout {
 
-    private final SecurityService securityService;
     private final MapGameService mapGameService;
     private final CapitalCityService cityService;
+    private final GuessingGameService guessingGameService;
 
+    private final WordsService wordsService;
 
-    private List<MapGame> allGames;
+    private List<MapGame> mapGameList;
+
+    private List<GuessingGame> guessingGameList;
 
     private VerticalLayout verticalLayout;
 
-    private final String user;
-
-    public GameBrowserView(SecurityService securityService, MapGameService mapGameService, CapitalCityService cityService) {
-        this.securityService = securityService;
+    public GameBrowserView(MapGameService mapGameService, CapitalCityService cityService,
+                           GuessingGameService guessingGameService, WordsService wordsService) {
         this.mapGameService = mapGameService;
-        this.user = securityService.getAuthenticatedUser().getUsername();
         this.cityService = cityService;
-        allGames = new ArrayList<>();
+        this.guessingGameService = guessingGameService;
+        this.wordsService = wordsService;
+        mapGameList = new ArrayList<>();
+        guessingGameList = new ArrayList<>();
 
         initComponents();
     }
@@ -62,7 +67,7 @@ public class GameBrowserView extends VerticalLayout {
         topButtonLayout.setPadding(false);
 
         var newGameButton = new Button("New Game", VaadinIcon.PLUS_CIRCLE_O.create(), buttonClickEvent -> {
-            EditSession editSession = new EditSession(mapGameService, cityService);
+            EditSession editSession = new EditSession(mapGameService, cityService, guessingGameService, wordsService);
             editSession.open();
             editSession.addDetachListener(detachEvent -> refresh());
         });
@@ -86,9 +91,16 @@ public class GameBrowserView extends VerticalLayout {
         verticalLayout.removeAll();
         verticalLayout.setPadding(true);
 
-        allGames = mapGameService.getAll();
-        for (MapGame mapGame : allGames) {
-            Card card = new Card(mapGameService, mapGame, mapGame.getPlayers().size());
+        mapGameList = mapGameService.getAll();
+        guessingGameList = guessingGameService.getAll();
+        createMapGameCards();
+        createGuessingGameCards();
+
+    }
+
+    private void createMapGameCards(){
+        for (MapGame mapGame : mapGameList) {
+            var card = new Card(mapGameService, mapGame, mapGame.getPlayers().size());
             var settings = new MenuBar();
             settings.addThemeVariants(MenuBarVariant.LUMO_SMALL, MenuBarVariant.LUMO_TERTIARY);
             var cogWheel = createIconItem(settings, VaadinIcon.COG, null,
@@ -97,14 +109,46 @@ public class GameBrowserView extends VerticalLayout {
             var subMenu = cogWheel.getSubMenu();
 
             createIconItem(subMenu, VaadinIcon.EDIT, "Edit", "", true, menuItemClickEvent -> {
-                EditSession editSession = new EditSession(mapGameService, cityService, mapGame);
+                var editSession = new EditSession(mapGameService, cityService, guessingGameService, wordsService, mapGame);
                 editSession.open();
                 editSession.addDetachListener(detachEvent -> refresh());
             });
             createIconItem(subMenu, VaadinIcon.TRASH, "Delete", "", true, menuItemClickEvent -> {
-                ConfirmDialog confirmDialog = new ConfirmDialog("Delete Session?",
+                var confirmDialog = new ConfirmDialog("Delete Session?",
                         "Are you sure you want to delete this session?", "Delete", confirmEvent -> {
                     mapGameService.delete(mapGame);
+                    refresh();
+                });
+                confirmDialog.setConfirmButtonTheme(ButtonVariant.LUMO_ERROR.getVariantName());
+                confirmDialog.setCancelable(true);
+                confirmDialog.open();
+            });
+
+            card.getJoinLayout().addComponentAsFirst(settings);
+
+            verticalLayout.add(card);
+        }
+    }
+
+    private void createGuessingGameCards(){
+        for (GuessingGame guessingGame : guessingGameList) {
+            var card = new Card(guessingGameService, guessingGame, guessingGame.getPlayers().size());
+            var settings = new MenuBar();
+            settings.addThemeVariants(MenuBarVariant.LUMO_SMALL, MenuBarVariant.LUMO_TERTIARY);
+            var cogWheel = createIconItem(settings, VaadinIcon.COG, null,
+                    null, false, null);
+
+            var subMenu = cogWheel.getSubMenu();
+
+            createIconItem(subMenu, VaadinIcon.EDIT, "Edit", "", true, menuItemClickEvent -> {
+                var editSession = new EditSession(mapGameService, cityService, guessingGameService, wordsService, new MapGame());
+                editSession.open();
+                editSession.addDetachListener(detachEvent -> refresh());
+            });
+            createIconItem(subMenu, VaadinIcon.TRASH, "Delete", "", true, menuItemClickEvent -> {
+                var confirmDialog = new ConfirmDialog("Delete Session?",
+                        "Are you sure you want to delete this session?", "Delete", confirmEvent -> {
+                    guessingGameService.delete(guessingGame);
                     refresh();
                 });
                 confirmDialog.setConfirmButtonTheme(ButtonVariant.LUMO_ERROR.getVariantName());
