@@ -1,5 +1,6 @@
 package com.example.application.views.guess;
 
+import com.example.application.components.characterbox.CharBox;
 import com.example.application.data.entity.GuessingGame;
 import com.example.application.data.entity.Players;
 import com.example.application.data.service.GuessingGameService;
@@ -11,6 +12,7 @@ import com.vaadin.collaborationengine.*;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.*;
@@ -42,7 +44,7 @@ public class GuessingGameView extends VerticalLayout implements BeforeEnterObser
 
     private List<Players> opponentPlayers;
 
-    private VerticalLayout gameBoardLayout;
+    private HorizontalLayout gameBoardLayout;
 
     private CollaborationBinder<GuessingGame> binder;
 
@@ -61,8 +63,11 @@ public class GuessingGameView extends VerticalLayout implements BeforeEnterObser
     private void initGame() {
         this.userInfo = new UserInfo(String.valueOf(securityService.getAuthenticatedUser().hashCode()), null);
 
-        this.gameBoardLayout = new VerticalLayout();
+        this.gameBoardLayout = new HorizontalLayout();
         this.gameBoardLayout.setSizeFull();
+        this.gameBoardLayout.setAlignItems(Alignment.START);
+        this.gameBoardLayout.setJustifyContentMode(JustifyContentMode.CENTER);
+        this.gameBoardLayout.setPadding(true);
 
         var splitLayout = new SplitLayout();
         splitLayout.addToPrimary(this.gameBoardLayout);
@@ -88,6 +93,13 @@ public class GuessingGameView extends VerticalLayout implements BeforeEnterObser
         splitLayout.addToSecondary(verticalLayout);
 
         add(splitLayout);
+    }
+
+    private void createWordBoxes(){
+        String currentWord = guessingGame.getCurrentWord();
+        for (int i = 0; i < currentWord.length(); i++) {
+            this.gameBoardLayout.add(new CharBox(currentWord.charAt(i)));
+        }
     }
 
     private void setSize(){
@@ -116,14 +128,15 @@ public class GuessingGameView extends VerticalLayout implements BeforeEnterObser
             Optional<GuessingGame> guessingGame = gameService.get(guessingGameID.get());
             guessingGame.ifPresentOrElse(game -> {
                 this.guessingGame = game;
-                player = playersService.save(user.getUsername(), game);
-                gameService.addPlayer(this.guessingGame, player);
-                userInfo.setName(user.getUsername());
+                this.player = playersService.save(user.getUsername(), game);
+                this.gameService.addPlayer(this.guessingGame, this.player);
+                this.userInfo.setName(user.getUsername());
 
                 String topic = this.guessingGame.getId().toString();
-                avatarGroup.setTopic(topic);
-                binder.setTopic(topic, () -> this.guessingGame);
-                list.setTopic(topic);
+                this.avatarGroup.setTopic(topic);
+                this.binder.setTopic(topic, () -> this.guessingGame);
+                this.list.setTopic(topic);
+                createWordBoxes();
 
             }, () -> noGameFoundDialog().open());
         }
