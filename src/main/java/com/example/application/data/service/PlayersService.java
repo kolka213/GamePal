@@ -1,5 +1,6 @@
 package com.example.application.data.service;
 
+import com.example.application.data.entity.GuessingGame;
 import com.example.application.data.entity.MapGame;
 import com.example.application.data.entity.Players;
 import com.vaadin.flow.component.map.configuration.Coordinate;
@@ -24,6 +25,14 @@ public class PlayersService {
         players.setPlayer(player);
         players.setCoordinate(coordinate);
         players.setMapGame(mapGame);
+
+        return repository.save(players);
+    }
+
+    public Players save(String player, GuessingGame guessingGame){
+        Players players = new Players();
+        players.setPlayer(player);
+        players.setGuessingGame(guessingGame);
 
         return repository.save(players);
     }

@@ -352,12 +352,8 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
                     map.getFeatureLayer().removeFeature(playerPositions.get(player)));
         }));
 
-        int index = mapGame.getPlayers().indexOf(player);
         player.setCoordinate(null);
         playersService.update(player);
-
-        //mapGame.getPlayers().set(index, player);
-        //mapGameService.save(mapGame);
 
         playerPositions.clear();
     }

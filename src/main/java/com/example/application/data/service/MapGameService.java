@@ -17,13 +17,10 @@ public class MapGameService {
 
     private final PlayersService playersService;
 
-    private final ApplicationEventPublisher eventPublisher;
-
     @Autowired
     public MapGameService(MapGameRepository repository, PlayersService playersService, ApplicationEventPublisher eventPublisher) {
         this.repository = repository;
         this.playersService = playersService;
-        this.eventPublisher = eventPublisher;
     }
 
     public void save(MapGame mapGame){

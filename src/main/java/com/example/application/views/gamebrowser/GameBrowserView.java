@@ -141,7 +141,7 @@ public class GameBrowserView extends VerticalLayout {
             var subMenu = cogWheel.getSubMenu();
 
             createIconItem(subMenu, VaadinIcon.EDIT, "Edit", "", true, menuItemClickEvent -> {
-                var editSession = new EditSession(mapGameService, cityService, guessingGameService, wordsService, new MapGame());
+                var editSession = new EditSession(mapGameService, cityService, guessingGameService, wordsService, guessingGame);
                 editSession.open();
                 editSession.addDetachListener(detachEvent -> refresh());
             });

@@ -13,6 +13,16 @@ public class Players extends AbstractEntity {
 
     private Coordinate coordinate;
 
+    @ManyToOne
+    @JoinColumn(name = "mapgame_id")
+    private MapGame mapGame;
+
+    @ManyToOne
+    @JoinColumn(name = "guessing_id")
+    private GuessingGame guessingGame;
+
+    public Players() {
+    }
 
     public String getPlayer() {
         return player;
@@ -30,10 +40,6 @@ public class Players extends AbstractEntity {
         this.coordinate = coordinate;
     }
 
-    @ManyToOne
-    @JoinColumn(name = "mapgame_id")
-    private MapGame mapGame;
-
     public MapGame getMapGame() {
         return mapGame;
     }
@@ -41,10 +47,6 @@ public class Players extends AbstractEntity {
     public void setMapGame(MapGame mapGame) {
         this.mapGame = mapGame;
     }
-
-    @ManyToOne
-    @JoinColumn(name = "guessing_id")
-    private GuessingGame guessingGame;
 
     public GuessingGame getGuessingGame() {
         return guessingGame;

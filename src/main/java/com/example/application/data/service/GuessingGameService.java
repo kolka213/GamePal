@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class GuessingGameService {
@@ -18,6 +20,10 @@ public class GuessingGameService {
     public GuessingGameService(GuessingGameRepository repository, PlayersService playersService) {
         this.repository = repository;
         this.playersService = playersService;
+    }
+
+    public Optional<GuessingGame> get(UUID uuid){
+        return repository.findById(uuid);
     }
 
     public void save(GuessingGame game){
@@ -38,9 +44,9 @@ public class GuessingGameService {
     }
 
     public void removePlayer(GuessingGame game, Players player){
-        playersService.delete(player);
         game.removePlayer(player);
         save(game);
+        playersService.delete(player);
     }
 
     public List<GuessingGame> getAll(){

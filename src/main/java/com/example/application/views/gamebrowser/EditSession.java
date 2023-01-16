@@ -42,10 +42,10 @@ public class EditSession extends Dialog {
     private final WordsService wordsService;
     private Game game;
 
-    Binder<Game> binder;
+    private Binder<Game> binder;
 
 
-    public EditSession(MapGameService mapGameService, CapitalCityService capitalCityService, GuessingGameService guessingGameService, WordsService wordsService, MapGame game) {
+    public EditSession(MapGameService mapGameService, CapitalCityService capitalCityService, GuessingGameService guessingGameService, WordsService wordsService, Game game) {
         this.mapGameService = mapGameService;
         this.capitalCityService = capitalCityService;
         this.guessingGameService = guessingGameService;
@@ -74,7 +74,10 @@ public class EditSession extends Dialog {
         gameTypeSelect.setLabel("Game Type:");
         gameTypeSelect.setItems("Map Game", "Guessing Game");
         gameTypeSelect.setValue("Map Game");
+        if (game instanceof MapGame) gameTypeSelect.setValue("Map Game");
+        if (game instanceof GuessingGame) gameTypeSelect.setValue("Guessing Game");
         gameTypeSelect.setEnabled(game == null);
+        gameTypeSelect.setRequiredIndicatorVisible(true);
 
         if (game == null) game = new Game();
 
@@ -106,7 +109,8 @@ public class EditSession extends Dialog {
         binder = new Binder<>(Game.class);
         binder.forField(nameField).withValidator(s -> !s.isBlank(), "Cannot be empty")
                 .bind(Game::getGameName, Game::setGameName);
-        binder.forField(playerCountField).asRequired("At least 2 players required")
+        binder.forField(playerCountField)
+                .withValidator(integer -> integer != null && integer > 1, "At least 2 players required")
                 .bind(Game::getMaxPLayerCount, Game::setMaxPLayerCount);
         binder.forField(isPrivateCheckbox).bind(Game::isPrivate, Game::setPrivate);
         binder.setBean(game);
@@ -182,7 +186,7 @@ public class EditSession extends Dialog {
         saveButton.addClickShortcut(Key.ENTER);
 
         binder.addStatusChangeListener(statusChangeEvent -> saveButton.setEnabled(!statusChangeEvent.hasValidationErrors()
-        && !nameField.getValue().isBlank()));
+        && !nameField.getValue().isBlank() && playerCountField.getValue() != null && !gameTypeSelect.getValue().isBlank()));
 
         var closeButton = new Button(VaadinIcon.CLOSE_BIG.create(), buttonClickEvent -> close());
         closeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
