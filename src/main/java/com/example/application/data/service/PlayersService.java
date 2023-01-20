@@ -1,5 +1,7 @@
 package com.example.application.data.service;
 
+import com.example.application.data.entity.Game;
+import com.example.application.data.entity.GuessingGame;
 import com.example.application.data.entity.MapGame;
 import com.example.application.data.entity.Players;
 import com.vaadin.flow.component.map.configuration.Coordinate;
@@ -28,6 +30,14 @@ public class PlayersService {
         return repository.save(players);
     }
 
+    public Players save(String player, GuessingGame guessingGame){
+        Players players = new Players();
+        players.setPlayer(player);
+        players.setGuessingGame(guessingGame);
+
+        return repository.save(players);
+    }
+
     public Players update(Players player){
         return repository.save(player);
     }
@@ -38,7 +48,9 @@ public class PlayersService {
 
 
     @Transactional(readOnly = true)
-    public List<Players> fetchAllPlayersFromGame(MapGame mapGame){
-        return repository.findAllByMapGame(mapGame);
+    public List<Players> fetchAllPlayersFromGame(Game game){
+        if (game instanceof MapGame) return repository.findAllByMapGame((MapGame) game);
+        if (game instanceof GuessingGame) return repository.findAllByGuessingGame((GuessingGame) game);
+        return null;
     }
 }
