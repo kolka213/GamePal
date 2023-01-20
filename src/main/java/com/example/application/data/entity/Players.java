@@ -13,6 +13,8 @@ public class Players extends AbstractEntity {
 
     private Coordinate coordinate;
 
+    private boolean guessed;
+
     @ManyToOne
     @JoinColumn(name = "mapgame_id")
     private MapGame mapGame;
@@ -54,5 +56,13 @@ public class Players extends AbstractEntity {
 
     public void setGuessingGame(GuessingGame guessingGame) {
         this.guessingGame = guessingGame;
+    }
+
+    public boolean hasGuessed() {
+        return guessed;
+    }
+
+    public void setGuessed(boolean guessed) {
+        this.guessed = guessed;
     }
 }

@@ -1,5 +1,6 @@
 package com.example.application.data.service;
 
+import com.example.application.data.entity.Game;
 import com.example.application.data.entity.GuessingGame;
 import com.example.application.data.entity.MapGame;
 import com.example.application.data.entity.Players;
@@ -47,7 +48,9 @@ public class PlayersService {
 
 
     @Transactional(readOnly = true)
-    public List<Players> fetchAllPlayersFromGame(MapGame mapGame){
-        return repository.findAllByMapGame(mapGame);
+    public List<Players> fetchAllPlayersFromGame(Game game){
+        if (game instanceof MapGame) return repository.findAllByMapGame((MapGame) game);
+        if (game instanceof GuessingGame) return repository.findAllByGuessingGame((GuessingGame) game);
+        return null;
     }
 }

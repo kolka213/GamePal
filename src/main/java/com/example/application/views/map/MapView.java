@@ -8,6 +8,7 @@ import com.example.application.data.service.CapitalCityService;
 import com.example.application.data.service.MapGameService;
 import com.example.application.data.service.PlayersService;
 import com.example.application.helper.CoordinateHelper;
+import com.example.application.helper.State;
 import com.example.application.security.SecurityService;
 import com.example.application.views.MainLayout;
 import com.example.application.views.gamebrowser.GameBrowserView;
@@ -396,16 +397,10 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
 
     @Override
     public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
-        if (gameId != null){
+        if (gameId != null) {
             Optional<MapGame> mapGame = mapGameService.get(gameId);
             mapGame.ifPresent(game -> mapGameService.removePlayer(game, player));
         }
         getUI().ifPresent(ui -> ui.access(() -> cityNameNotification.close()));
-    }
-
-    private enum State{
-        RUNNING,
-        FINISHED,
-        WAITING
     }
 }
