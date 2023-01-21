@@ -15,10 +15,14 @@ public class Game extends AbstractEntity{
     @Column(name = "max_player_count")
     private Integer maxPLayerCount;
 
-    public Game(String gameName, boolean isPrivate, Integer maxPLayerCount) {
+    @Column(name = "password")
+    private String password;
+
+    public Game(String gameName, boolean isPrivate, Integer maxPLayerCount, String password) {
         this.gameName = gameName;
         this.isPrivate = isPrivate;
         this.maxPLayerCount = maxPLayerCount;
+        this.password = password;
     }
 
     public Game() {
@@ -46,5 +50,13 @@ public class Game extends AbstractEntity{
 
     public void setMaxPLayerCount(Integer maxPLayerCount) {
         this.maxPLayerCount = maxPLayerCount;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
