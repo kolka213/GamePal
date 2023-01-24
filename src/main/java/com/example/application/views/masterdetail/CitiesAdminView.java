@@ -31,15 +31,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
 
-import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import java.util.Optional;
 import java.util.UUID;
 
-@PageTitle("Master Detail")
+@PageTitle("City Details")
 @Route(value = "cities/:cityID?/:action?(edit)", layout = MainLayout.class)
 @Uses(Icon.class)
-@PermitAll
-public class MasterDetailView extends Div implements BeforeEnterObserver {
+@RolesAllowed("ADMIN")
+public class CitiesAdminView extends Div implements BeforeEnterObserver {
 
     private final String cityID = "cityID";
     private final String CITY_EDIT_ROUTE_TEMPLATE = "cities/%s/edit";
@@ -54,6 +54,7 @@ public class MasterDetailView extends Div implements BeforeEnterObserver {
 
     private final Button cancel = new Button("Cancel");
     private final Button save = new Button("Save");
+    private final Button delete = new Button("delete");
 
     private final CollaborationBinder<CapitalCity> binder;
 
@@ -64,7 +65,7 @@ public class MasterDetailView extends Div implements BeforeEnterObserver {
     private final SecurityService securityService;
 
     @Autowired
-    public MasterDetailView(CapitalCityService cityService, SecurityService securityService) {
+    public CitiesAdminView(CapitalCityService cityService, SecurityService securityService) {
         this.cityService = cityService;
         this.securityService = securityService;
         addClassNames("master-detail-view");
@@ -80,6 +81,7 @@ public class MasterDetailView extends Div implements BeforeEnterObserver {
 
         // Create UI
         SplitLayout splitLayout = new SplitLayout();
+        splitLayout.setSplitterPosition(70);
 
         avatarGroup = new CollaborationAvatarGroup(userInfo, null);
         avatarGroup.getStyle().set("visibility", "hidden");
@@ -103,9 +105,11 @@ public class MasterDetailView extends Div implements BeforeEnterObserver {
         grid.asSingleSelect().addValueChangeListener(event -> {
             if (event.getValue() != null) {
                 UI.getCurrent().navigate(String.format(CITY_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+                delete.setVisible(true);
             } else {
                 clearForm();
-                UI.getCurrent().navigate(MasterDetailView.class);
+                UI.getCurrent().navigate(CitiesAdminView.class);
+                delete.setVisible(false);
             }
         });
 
@@ -121,6 +125,12 @@ public class MasterDetailView extends Div implements BeforeEnterObserver {
             refreshGrid();
         });
 
+        delete.addClickListener(buttonClickEvent ->{
+            cityService.delete(this.capitalCity);
+            clearForm();
+            refreshGrid();
+        });
+
         save.addClickListener(e -> {
             try {
                 if (this.capitalCity == null) {
@@ -132,7 +142,7 @@ public class MasterDetailView extends Div implements BeforeEnterObserver {
                 clearForm();
                 refreshGrid();
                 Notification.show("City details stored.");
-                UI.getCurrent().navigate(MasterDetailView.class);
+                UI.getCurrent().navigate(CitiesAdminView.class);
             } catch (ValidationException validationException) {
                 Notification.show("An exception happened while trying to store the city details.");
             }
@@ -146,14 +156,16 @@ public class MasterDetailView extends Div implements BeforeEnterObserver {
             Optional<CapitalCity> capitalCityFromBackend = cityService.get(cityId.get());
             if (capitalCityFromBackend.isPresent()) {
                 populateForm(capitalCityFromBackend.get());
+                delete.setVisible(true);
             } else {
                 Notification.show(
-                        String.format("The requested samplePerson was not found, ID = %d", cityId.get()), 3000,
+                        String.format("The requested city was not found, ID = %d", cityId.get()), 3000,
                         Notification.Position.BOTTOM_START);
                 // when a row is selected but the data is no longer available,
                 // refresh grid
                 refreshGrid();
-                event.forwardTo(MasterDetailView.class);
+                delete.setVisible(false);
+                event.forwardTo(CitiesAdminView.class);
             }
         }
     }
@@ -184,7 +196,9 @@ public class MasterDetailView extends Div implements BeforeEnterObserver {
         buttonLayout.setClassName("button-layout");
         cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        buttonLayout.add(save, cancel);
+        delete.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
+        delete.setVisible(false);
+        buttonLayout.add(save, cancel, delete);
         editorLayoutDiv.add(buttonLayout);
     }
 

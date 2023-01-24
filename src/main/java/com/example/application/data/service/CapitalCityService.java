@@ -45,4 +45,8 @@ public class CapitalCityService {
     public CapitalCity findCityByName(String cityName){
         return repository.findCapitalCityByName(cityName);
     }
+
+    public void delete(CapitalCity city){
+        repository.delete(city);
+    }
 }

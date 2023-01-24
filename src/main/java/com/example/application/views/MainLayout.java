@@ -6,19 +6,21 @@ import com.example.application.components.appnav.AppNavItem;
 import com.example.application.security.SecurityService;
 import com.example.application.views.chat.ChatView;
 import com.example.application.views.gamebrowser.GameBrowserView;
-import com.example.application.views.masterdetail.MasterDetailView;
+import com.example.application.views.masterdetail.CitiesAdminView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Footer;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Header;
+import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import java.util.Arrays;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -62,11 +64,42 @@ public class MainLayout extends AppLayout {
         // For documentation, visit https://github.com/vaadin/vcf-nav#readme
         AppNav nav = new AppNav();
 
+        AppNavItem citiesNavItem = new AppNavItem("Cities", CitiesAdminView.class);
+        citiesNavItem.setVisible(securityService.getAuthenticatedUser().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")));
+
+        Icon citiesIcon = new Icon(VaadinIcon.PIN);
+        citiesIcon.setSize("16px");
+        citiesIcon.setColor("var(--lumo-error-color)");
+
+        citiesNavItem.setIcon(citiesIcon);
+        citiesNavItem.getElement().appendChild(createAdminBadge());
+
+        AppNavItem wordsNavItem = new AppNavItem("Words", "words");
+        wordsNavItem.setVisible(securityService.getAuthenticatedUser().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")));
+
+        Icon wordsIcon = new Icon(VaadinIcon.COMMENTS);
+        wordsIcon.setSize("16px");
+        wordsIcon.setColor("var(--lumo-error-color)");
+
+        wordsNavItem.setIcon(wordsIcon);
+        wordsNavItem.getElement().appendChild(createAdminBadge());
+
         nav.addItem(new AppNavItem("Chat", ChatView.class, "la la-comments"));
-        nav.addItem(new AppNavItem("Master Detail", MasterDetailView.class, "la la-columns"));
         nav.addItem(new AppNavItem("Game Browser", GameBrowserView.class, "la la-columns"));
+        nav.addItem(citiesNavItem);
+        nav.addItem(wordsNavItem);
+
 
         return nav;
+    }
+
+    private Element createAdminBadge(){
+        Span adminBadge = new Span("ADMIN");
+        adminBadge.getElement().getThemeList().addAll(
+                Arrays.asList("badge", "error", "primary", "small", "pill"));
+        adminBadge.getStyle().set("position", "absolute")
+                .set("transform", "translate(20%, 0%)");
+        return adminBadge.getElement();
     }
 
     private Footer createFooter() {
