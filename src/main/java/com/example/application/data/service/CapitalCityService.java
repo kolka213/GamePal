@@ -2,12 +2,12 @@ package com.example.application.data.service;
 
 import com.example.application.data.entity.CapitalCity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Service
 public class CapitalCityService {
@@ -26,6 +26,19 @@ public class CapitalCityService {
         List<CapitalCity> capitalCities = repository.findAll();
         Collections.shuffle(capitalCities);
         return capitalCities;
+    }
+
+    @Transactional
+    public Page<CapitalCity> getAll(Pageable pageable) {
+        return repository.findAll(pageable);
+    }
+
+    public CapitalCity update(CapitalCity city){
+        return repository.save(city);
+    }
+
+    public Optional<CapitalCity> get(UUID uuid){
+        return repository.findById(uuid);
     }
 
     @Transactional(readOnly = true)
