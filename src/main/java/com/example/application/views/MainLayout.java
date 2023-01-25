@@ -4,9 +4,10 @@ package com.example.application.views;
 import com.example.application.components.appnav.AppNav;
 import com.example.application.components.appnav.AppNavItem;
 import com.example.application.security.SecurityService;
+import com.example.application.views.adminviews.CitiesAdminView;
+import com.example.application.views.adminviews.WordsAdminView;
 import com.example.application.views.chat.ChatView;
 import com.example.application.views.gamebrowser.GameBrowserView;
-import com.example.application.views.masterdetail.CitiesAdminView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
@@ -74,7 +75,7 @@ public class MainLayout extends AppLayout {
         citiesNavItem.setIcon(citiesIcon);
         citiesNavItem.getElement().appendChild(createAdminBadge());
 
-        AppNavItem wordsNavItem = new AppNavItem("Words", "words");
+        AppNavItem wordsNavItem = new AppNavItem("Words", WordsAdminView.class);
         wordsNavItem.setVisible(securityService.getAuthenticatedUser().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")));
 
         Icon wordsIcon = new Icon(VaadinIcon.COMMENTS);

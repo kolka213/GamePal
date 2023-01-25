@@ -1,4 +1,4 @@
-package com.example.application.views.masterdetail;
+package com.example.application.views.adminviews;
 
 import com.example.application.data.entity.CapitalCity;
 import com.example.application.data.service.CapitalCityService;
