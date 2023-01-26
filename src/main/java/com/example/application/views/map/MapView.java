@@ -366,11 +366,14 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
         if (mapGameID.isPresent()){
             Optional<MapGame> mapGame = mapGameService.get(mapGameID.get());
             mapGame.ifPresentOrElse(game -> {
-                player = playersService.save(user.getUsername(), null, game);
-                mapGameService.addPlayer(game, player);
                 userInfo.setName(user.getUsername());
                 this.gameId = game.getId();
                 this.mapGame = game;
+                if (this.mapGame.getPlayers().stream().noneMatch(players -> players.getPlayer().equals(user.getUsername()))){
+                    player = playersService.save(user.getUsername(), null, this.mapGame);
+                    mapGameService.addPlayer(this.mapGame, this.player);
+                }
+
                 playerPositions.put(userInfo.getName(), null);
 
                 cityIterator = game.getCapitalCities().entrySet().iterator();
@@ -399,7 +402,10 @@ public class MapView extends VerticalLayout implements BeforeEnterObserver, Befo
     public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
         if (gameId != null) {
             Optional<MapGame> mapGame = mapGameService.get(gameId);
-            mapGame.ifPresent(game -> mapGameService.removePlayer(game, player));
+            mapGame.ifPresent(game -> {
+                mapGameService.removePlayer(game, this.player);
+                playersService.delete(this.player);
+            });
         }
         getUI().ifPresent(ui -> ui.access(() -> cityNameNotification.close()));
     }

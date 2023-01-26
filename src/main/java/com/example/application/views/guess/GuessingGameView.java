@@ -255,8 +255,10 @@ public class GuessingGameView extends VerticalLayout implements BeforeEnterObser
             Optional<GuessingGame> guessingGame = gameService.get(guessingGameID.get());
             guessingGame.ifPresentOrElse(game -> {
                 this.guessingGame = game;
-                this.player = playersService.save(user.getUsername(), game);
-                this.gameService.addPlayer(this.guessingGame, this.player);
+                if (this.guessingGame.getPlayers().stream().noneMatch(players -> players.getPlayer().equals(user.getUsername()))){
+                    player = playersService.save(user.getUsername(), this.guessingGame);
+                    gameService.addPlayer(this.guessingGame, this.player);
+                }
                 this.userInfo.setName(user.getUsername());
 
                 String topic = this.guessingGame.getId().toString();

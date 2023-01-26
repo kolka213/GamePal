@@ -103,7 +103,6 @@ public class GameBrowserView extends VerticalLayout {
         }
         createMapGameCards();
         createGuessingGameCards();
-
     }
 
     private void createMapGameCards(){

@@ -61,15 +61,18 @@ public class Card extends VerticalLayout {
         this.currentPlayerCount = mapGame.getPlayers().size();
         this.maxPlayerCount = mapGame.getMaxPLayerCount();
         this.joinButton = new Button("Join", VaadinIcon.SIGN_IN.create(), buttonClickEvent -> {
-            if (!this.mapGame.isPrivate()) {
-                UI.getCurrent().navigate(MAP_ROUTE_PREFIX + mapGame.getId());
+            if (this.mapGame.getPlayers().size() < this.mapGame.getMaxPLayerCount()) {
+                if (!this.mapGame.isPrivate()) {
+                    UI.getCurrent().navigate(MAP_ROUTE_PREFIX + mapGame.getId());
+                }
+                passwordField.setVisible(true);
+                joinButton.setEnabled(false);
+                if (passwordField.getValue().equals(mapGame.getPassword())) {
+                    UI.getCurrent().navigate(MAP_ROUTE_PREFIX + mapGame.getId());
+                }
+                passwordField.setInvalid(true);
             }
-            passwordField.setVisible(true);
-            joinButton.setEnabled(false);
-            if (passwordField.getValue().equals(mapGame.getPassword())){
-                UI.getCurrent().navigate(MAP_ROUTE_PREFIX + mapGame.getId());
-            }
-            passwordField.setInvalid(true);
+            joinButton.setVisible(this.mapGame.getPlayers().size() < this.mapGame.getMaxPLayerCount());
         });
         initComponents();
     }
@@ -86,15 +89,19 @@ public class Card extends VerticalLayout {
         this.currentPlayerCount = guessingGame.getPlayers().size();
         this.maxPlayerCount = guessingGame.getMaxPLayerCount();
         this.joinButton = new Button("Join", VaadinIcon.SIGN_IN.create(), buttonClickEvent -> {
-            if (!this.guessingGame.isPrivate()) {
-                UI.getCurrent().navigate(GUESS_ROUTE_PREFIX + guessingGame.getId());
+            if (this.guessingGame.getPlayers().size() < this.guessingGame.getMaxPLayerCount()) {
+
+                if (!this.guessingGame.isPrivate()) {
+                    UI.getCurrent().navigate(GUESS_ROUTE_PREFIX + guessingGame.getId());
+                }
+                passwordField.setVisible(true);
+                joinButton.setEnabled(false);
+                if (passwordField.getValue().equals(guessingGame.getPassword())) {
+                    UI.getCurrent().navigate(GUESS_ROUTE_PREFIX + guessingGame.getId());
+                }
+                passwordField.setInvalid(true);
             }
-            passwordField.setVisible(true);
-            joinButton.setEnabled(false);
-            if (passwordField.getValue().equals(guessingGame.getPassword())){
-                UI.getCurrent().navigate(GUESS_ROUTE_PREFIX + guessingGame.getId());
-            }
-            passwordField.setInvalid(true);
+            joinButton.setVisible(this.guessingGame.getPlayers().size() < this.guessingGame.getMaxPLayerCount());
         });
         initComponents();
     }

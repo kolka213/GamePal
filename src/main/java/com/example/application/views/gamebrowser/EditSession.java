@@ -94,6 +94,7 @@ public class EditSession extends Dialog {
         playerCountField = new IntegerField("Max. Player Count:");
         playerCountField.setValue(2);
         playerCountField.setMin(2);
+        playerCountField.setMax(20);
         playerCountField.setStepButtonsVisible(true);
         playerCountField.setSuffixComponent(VaadinIcon.GAMEPAD.create());
         playerCountField.setWidth(75f, Unit.PERCENTAGE);
@@ -119,7 +120,8 @@ public class EditSession extends Dialog {
         binder.forField(nameField).withValidator(s -> !s.isBlank(), "Cannot be empty")
                 .bind(Game::getGameName, Game::setGameName);
         binder.forField(playerCountField)
-                .withValidator(integer -> integer != null && integer > 1, "At least 2 players required")
+                .withValidator(integer -> integer != null && integer > 1 && integer < 21,
+                        "Player count has to be at least 2 and max 20.")
                 .bind(Game::getMaxPLayerCount, Game::setMaxPLayerCount);
         binder.forField(isPrivateCheckbox).bind(Game::isPrivate, Game::setPrivate);
         binder.forField(passwordField).bind(Game::getPassword, Game::setPassword);
