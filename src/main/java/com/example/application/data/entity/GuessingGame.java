@@ -1,16 +1,13 @@
 package com.example.application.data.entity;
 
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 public class GuessingGame extends Game {
 
-    @OneToMany(mappedBy = "guessingGame")
+    @OneToMany(mappedBy = "guessingGame", cascade = CascadeType.REMOVE)
     private List<Players> players;
 
     @ElementCollection(targetClass = String.class)

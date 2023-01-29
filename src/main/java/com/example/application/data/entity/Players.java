@@ -9,7 +9,7 @@ import javax.persistence.ManyToOne;
 @Entity
 public class Players extends AbstractEntity {
 
-    private String player;
+    private String playerName;
 
     private Coordinate coordinate;
 
@@ -26,12 +26,12 @@ public class Players extends AbstractEntity {
     public Players() {
     }
 
-    public String getPlayer() {
-        return player;
+    public String getPlayerName() {
+        return playerName;
     }
 
-    public void setPlayer(String player) {
-        this.player = player;
+    public void setPlayerName(String player) {
+        this.playerName = player;
     }
 
     public Coordinate getCoordinate() {

@@ -23,7 +23,7 @@ public class PlayersService {
 
     public Players save(String player, Coordinate coordinate, MapGame mapGame){
         Players players = new Players();
-        players.setPlayer(player);
+        players.setPlayerName(player);
         players.setCoordinate(coordinate);
         players.setMapGame(mapGame);
 
@@ -32,7 +32,7 @@ public class PlayersService {
 
     public Players save(String player, GuessingGame guessingGame){
         Players players = new Players();
-        players.setPlayer(player);
+        players.setPlayerName(player);
         players.setGuessingGame(guessingGame);
 
         return repository.save(players);
@@ -44,6 +44,10 @@ public class PlayersService {
 
     public void delete(Players player){
         repository.delete(player);
+    }
+
+    public Players getPlayerByName(String userName){
+        return repository.findByPlayerName(userName);
     }
 
 

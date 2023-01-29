@@ -219,7 +219,7 @@ public class GuessingGameView extends VerticalLayout implements BeforeEnterObser
 
     private void showWinnerNotification(Players player) {
         getUI().ifPresent(ui -> ui.access(() -> {
-            this.winnerNotification = new Notification(String.format("%s has guessed the word.", player.getPlayer()));
+            this.winnerNotification = new Notification(String.format("%s has guessed the word.", player.getPlayerName()));
             this.winnerNotification.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
             this.winnerNotification.setPosition(Notification.Position.BOTTOM_CENTER);
             this.winnerNotification.setDuration(5000);
@@ -255,11 +255,13 @@ public class GuessingGameView extends VerticalLayout implements BeforeEnterObser
             Optional<GuessingGame> guessingGame = gameService.get(guessingGameID.get());
             guessingGame.ifPresentOrElse(game -> {
                 this.guessingGame = game;
-                if (this.guessingGame.getPlayers().stream().noneMatch(players -> players.getPlayer().equals(user.getUsername()))){
+                if (this.guessingGame.getPlayers().stream().noneMatch(players -> players.getPlayerName().equals(user.getUsername()))){
                     player = playersService.save(user.getUsername(), this.guessingGame);
                     gameService.addPlayer(this.guessingGame, this.player);
                 }
                 this.userInfo.setName(user.getUsername());
+
+                this.player = playersService.getPlayerByName(user.getUsername());
 
                 String topic = this.guessingGame.getId().toString();
                 this.avatarGroup.setTopic(topic);
@@ -277,7 +279,7 @@ public class GuessingGameView extends VerticalLayout implements BeforeEnterObser
     @Override
     public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
         if (guessingGame != null){
-            gameService.removePlayer(guessingGame, player);
+            playersService.delete(this.player);
         }
     }
 }

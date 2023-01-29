@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @Entity
 public class MapGame extends Game {
 
-    @OneToMany(mappedBy = "mapGame")
+    @OneToMany(mappedBy = "mapGame", cascade = CascadeType.REMOVE)
     private List<Players> players;
 
     @ElementCollection(targetClass = HashMap.class)

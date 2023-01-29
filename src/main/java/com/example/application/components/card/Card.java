@@ -116,7 +116,7 @@ public class Card extends VerticalLayout {
 
         if(mapGame != null) {
             for (Players player : mapGame.getPlayers()) {
-                AvatarGroup.AvatarGroupItem avatarGroupItem = new AvatarGroup.AvatarGroupItem(player.getPlayer());
+                AvatarGroup.AvatarGroupItem avatarGroupItem = new AvatarGroup.AvatarGroupItem(player.getPlayerName());
                 avatarGroupItem.setColorIndex(colorIdx++);
                 avatarGroup.add(avatarGroupItem);
             }
@@ -124,7 +124,7 @@ public class Card extends VerticalLayout {
 
         if (guessingGame != null){
             for (Players player : guessingGame.getPlayers()) {
-                AvatarGroup.AvatarGroupItem avatarGroupItem = new AvatarGroup.AvatarGroupItem(player.getPlayer());
+                AvatarGroup.AvatarGroupItem avatarGroupItem = new AvatarGroup.AvatarGroupItem(player.getPlayerName());
                 avatarGroupItem.setColorIndex(colorIdx++);
                 avatarGroup.add(avatarGroupItem);
             }
