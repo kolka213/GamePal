@@ -8,6 +8,7 @@ import com.example.application.data.service.CapitalCityService;
 import com.example.application.data.service.GuessingGameService;
 import com.example.application.data.service.MapGameService;
 import com.example.application.data.service.WordsService;
+import com.example.application.security.SecurityService;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
@@ -45,6 +46,8 @@ public class EditSession extends Dialog {
     private final WordsService wordsService;
     private Game game;
 
+    private SecurityService securityService;
+
     private Binder<Game> binder;
 
 
@@ -58,11 +61,12 @@ public class EditSession extends Dialog {
         setHeaderTitle("Edit Game");
     }
 
-    public EditSession(MapGameService mapGameService, CapitalCityService capitalCityService, GuessingGameService guessingGameService, WordsService wordsService){
+    public EditSession(MapGameService mapGameService, CapitalCityService capitalCityService, GuessingGameService guessingGameService, WordsService wordsService, SecurityService securityService){
         this.mapGameService = mapGameService;
         this.capitalCityService = capitalCityService;
         this.guessingGameService = guessingGameService;
         this.wordsService = wordsService;
+        this.securityService = securityService;
         initComponents();
         setHeaderTitle("Create Game");
     }
@@ -70,8 +74,6 @@ public class EditSession extends Dialog {
     private void initComponents(){
         setCloseOnEsc(false);
         setCloseOnOutsideClick(false);
-
-        binder = new Binder<>();
 
         var gameTypeSelect = new Select<String>();
         gameTypeSelect.setLabel("Game Type:");
@@ -164,6 +166,7 @@ public class EditSession extends Dialog {
                         mapGame.setGameCapitalCity(capitalCities.get(0));
                         mapGame.setGameName(binder.getBean().getGameName());
                         mapGame.setMaxPLayerCount(binder.getBean().getMaxPLayerCount());
+                        mapGame.setOwner(securityService.getAuthenticatedUser().getUsername());
                         mapGame.setPrivate(binder.getBean().isPrivate());
                         if (binder.getBean().isPrivate()){
                             mapGame.setPassword(binder.getBean().getPassword());
@@ -179,6 +182,7 @@ public class EditSession extends Dialog {
                         guessingGame.setCurrentWord(words.get(0));
                         guessingGame.setGameName(binder.getBean().getGameName());
                         guessingGame.setMaxPLayerCount(binder.getBean().getMaxPLayerCount());
+                        guessingGame.setOwner(securityService.getAuthenticatedUser().getUsername());
                         guessingGame.setPrivate(binder.getBean().isPrivate());
                         if (binder.getBean().isPrivate()){
                             guessingGame.setPassword(binder.getBean().getPassword());

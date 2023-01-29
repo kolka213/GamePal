@@ -7,6 +7,7 @@ import com.example.application.data.service.CapitalCityService;
 import com.example.application.data.service.GuessingGameService;
 import com.example.application.data.service.MapGameService;
 import com.example.application.data.service.WordsService;
+import com.example.application.security.SecurityService;
 import com.example.application.views.MainLayout;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -42,6 +43,8 @@ public class GameBrowserView extends VerticalLayout {
 
     private final WordsService wordsService;
 
+    private final SecurityService securityService;
+
     private List<MapGame> mapGameList;
 
     private List<GuessingGame> guessingGameList;
@@ -49,11 +52,12 @@ public class GameBrowserView extends VerticalLayout {
     private VerticalLayout verticalLayout;
 
     public GameBrowserView(MapGameService mapGameService, CapitalCityService cityService,
-                           GuessingGameService guessingGameService, WordsService wordsService) {
+                           GuessingGameService guessingGameService, WordsService wordsService, SecurityService securityService) {
         this.mapGameService = mapGameService;
         this.cityService = cityService;
         this.guessingGameService = guessingGameService;
         this.wordsService = wordsService;
+        this.securityService = securityService;
         mapGameList = new ArrayList<>();
         guessingGameList = new ArrayList<>();
 
@@ -68,7 +72,7 @@ public class GameBrowserView extends VerticalLayout {
         topButtonLayout.setPadding(false);
 
         var newGameButton = new Button("New Game", VaadinIcon.PLUS_CIRCLE_O.create(), buttonClickEvent -> {
-            EditSession editSession = new EditSession(mapGameService, cityService, guessingGameService, wordsService);
+            EditSession editSession = new EditSession(mapGameService, cityService, guessingGameService, wordsService, securityService);
             editSession.open();
             editSession.addDetachListener(detachEvent -> refresh());
         });
@@ -112,6 +116,7 @@ public class GameBrowserView extends VerticalLayout {
             settings.addThemeVariants(MenuBarVariant.LUMO_SMALL, MenuBarVariant.LUMO_TERTIARY);
             var cogWheel = createIconItem(settings, VaadinIcon.COG, null,
                     null, false, null);
+            settings.setVisible(securityService.getAuthenticatedUser().getUsername().equals(mapGame.getOwner()));
 
             var subMenu = cogWheel.getSubMenu();
 
@@ -144,6 +149,8 @@ public class GameBrowserView extends VerticalLayout {
             settings.addThemeVariants(MenuBarVariant.LUMO_SMALL, MenuBarVariant.LUMO_TERTIARY);
             var cogWheel = createIconItem(settings, VaadinIcon.COG, null,
                     null, false, null);
+            settings.setVisible(securityService.getAuthenticatedUser().getUsername().equals(guessingGame.getOwner()));
+
 
             var subMenu = cogWheel.getSubMenu();
 
