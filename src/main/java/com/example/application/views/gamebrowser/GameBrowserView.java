@@ -14,6 +14,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.contextmenu.HasMenuItems;
 import com.vaadin.flow.component.contextmenu.MenuItem;
@@ -26,15 +27,18 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 
 import javax.annotation.security.PermitAll;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @PageTitle("Game Browser")
 @Route(value = "gamebrowser", layout = MainLayout.class)
 @PermitAll
+@PreserveOnRefresh
 public class GameBrowserView extends VerticalLayout {
 
     private final MapGameService mapGameService;
@@ -50,6 +54,8 @@ public class GameBrowserView extends VerticalLayout {
     private List<GuessingGame> guessingGameList;
 
     private VerticalLayout verticalLayout;
+
+    private CheckboxGroup<String> filterGroup;
 
     public GameBrowserView(MapGameService mapGameService, CapitalCityService cityService,
                            GuessingGameService guessingGameService, WordsService wordsService, SecurityService securityService) {
@@ -71,13 +77,19 @@ public class GameBrowserView extends VerticalLayout {
         topButtonLayout.setJustifyContentMode(JustifyContentMode.BETWEEN);
         topButtonLayout.setPadding(false);
 
+        filterGroup = new CheckboxGroup<>();
+        filterGroup.setItems("Map Game", "Guessing Game");
+        filterGroup.addSelectionListener(multiSelectionEvent -> {
+            refresh(multiSelectionEvent.getValue());
+        });
+
         var newGameButton = new Button("New Game", VaadinIcon.PLUS_CIRCLE_O.create(), buttonClickEvent -> {
             EditSession editSession = new EditSession(mapGameService, cityService, guessingGameService, wordsService, securityService);
             editSession.open();
-            editSession.addDetachListener(detachEvent -> refresh());
+            editSession.addDetachListener(detachEvent -> refresh(filterGroup.getValue()));
         });
 
-        var refreshButton = new Button(VaadinIcon.REFRESH.create(), buttonClickEvent -> refresh());
+        var refreshButton = new Button(VaadinIcon.REFRESH.create(), buttonClickEvent -> refresh(filterGroup.getValue()));
         refreshButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
         Tooltip.forComponent(refreshButton).setText("Refresh");
 
@@ -86,14 +98,16 @@ public class GameBrowserView extends VerticalLayout {
         verticalLayout = new VerticalLayout();
         verticalLayout.setSizeFull();
 
-        topButtonLayout.add(newGameButton, refreshButton);
+        topButtonLayout.add(newGameButton, filterGroup, refreshButton);
 
         add(topButtonLayout, verticalLayout);
 
-        refresh();
+        filterGroup.select("Map Game", "Guessing Game");
+
+        refresh(filterGroup.getValue());
     }
 
-    public void refresh() {
+    public void refresh(Set<String> filter) {
         verticalLayout.removeAll();
         verticalLayout.setPadding(true);
 
@@ -105,8 +119,8 @@ public class GameBrowserView extends VerticalLayout {
             verticalLayout.add(h1);
             verticalLayout.setAlignItems(Alignment.CENTER);
         }
-        createMapGameCards();
-        createGuessingGameCards();
+        if (filter.contains("Map Game")) createMapGameCards();
+        if (filter.contains("Guessing Game")) createGuessingGameCards();
     }
 
     private void createMapGameCards(){
@@ -123,13 +137,13 @@ public class GameBrowserView extends VerticalLayout {
             createIconItem(subMenu, VaadinIcon.EDIT, "Edit", "", true, menuItemClickEvent -> {
                 var editSession = new EditSession(mapGameService, cityService, guessingGameService, wordsService, mapGame);
                 editSession.open();
-                editSession.addDetachListener(detachEvent -> refresh());
+                editSession.addDetachListener(detachEvent -> refresh(filterGroup.getValue()));
             });
             createIconItem(subMenu, VaadinIcon.TRASH, "Delete", "", true, menuItemClickEvent -> {
                 var confirmDialog = new ConfirmDialog("Delete Session?",
                         "Are you sure you want to delete this session?", "Delete", confirmEvent -> {
                     mapGameService.delete(mapGame);
-                    refresh();
+                    refresh(filterGroup.getValue());
                 });
                 confirmDialog.setConfirmButtonTheme(ButtonVariant.LUMO_ERROR.getVariantName());
                 confirmDialog.setCancelable(true);
@@ -157,13 +171,13 @@ public class GameBrowserView extends VerticalLayout {
             createIconItem(subMenu, VaadinIcon.EDIT, "Edit", "", true, menuItemClickEvent -> {
                 var editSession = new EditSession(mapGameService, cityService, guessingGameService, wordsService, guessingGame);
                 editSession.open();
-                editSession.addDetachListener(detachEvent -> refresh());
+                editSession.addDetachListener(detachEvent -> refresh(filterGroup.getValue()));
             });
             createIconItem(subMenu, VaadinIcon.TRASH, "Delete", "", true, menuItemClickEvent -> {
                 var confirmDialog = new ConfirmDialog("Delete Session?",
                         "Are you sure you want to delete this session?", "Delete", confirmEvent -> {
                     guessingGameService.delete(guessingGame);
-                    refresh();
+                    refresh(filterGroup.getValue());
                 });
                 confirmDialog.setConfirmButtonTheme(ButtonVariant.LUMO_ERROR.getVariantName());
                 confirmDialog.setCancelable(true);

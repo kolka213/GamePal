@@ -48,6 +48,7 @@ public class ChatView extends VerticalLayout {
         CollaborationMessageList list = new CollaborationMessageList(userInfo, "chat/#general");
         list.setWidthFull();
 
+
         // `CollaborationMessageInput is a textfield and button, to be able to
         // submit new messages. To avoid having to set the same info into both
         // the message list and message input, the input takes in the list as an
