@@ -34,7 +34,7 @@ public class ChatView extends VerticalLayout {
                 securityService.getAuthenticatedUser().getUsername());
 
         // Tabs allow us to change chat rooms.
-        Tabs tabs = new Tabs(new Tab("#general"), new Tab("#support"), new Tab("#casual"));
+        Tabs tabs = new Tabs(new Tab("#general"), new Tab("#mapgame"), new Tab("#guessinggame"));
         tabs.setWidthFull();
 
         // `CollaborationMessageList` displays messages that are in a
