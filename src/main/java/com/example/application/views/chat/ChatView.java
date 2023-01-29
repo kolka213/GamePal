@@ -47,7 +47,7 @@ public class ChatView extends VerticalLayout {
         // server restarts.
         CollaborationMessageList list = new CollaborationMessageList(userInfo, "chat/#general");
         list.setWidthFull();
-        list.addClassNames("chat-view-message-list");
+
 
         // `CollaborationMessageInput is a textfield and button, to be able to
         // submit new messages. To avoid having to set the same info into both

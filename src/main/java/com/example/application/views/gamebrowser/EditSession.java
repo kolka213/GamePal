@@ -8,6 +8,7 @@ import com.example.application.data.service.CapitalCityService;
 import com.example.application.data.service.GuessingGameService;
 import com.example.application.data.service.MapGameService;
 import com.example.application.data.service.WordsService;
+import com.example.application.security.SecurityService;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
@@ -22,6 +23,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -36,11 +38,15 @@ public class EditSession extends Dialog {
 
     private Checkbox isPrivateCheckbox;
 
+    private PasswordField passwordField;
+
     private final MapGameService mapGameService;
     private final CapitalCityService capitalCityService;
     private final GuessingGameService guessingGameService;
     private final WordsService wordsService;
     private Game game;
+
+    private SecurityService securityService;
 
     private Binder<Game> binder;
 
@@ -55,11 +61,12 @@ public class EditSession extends Dialog {
         setHeaderTitle("Edit Game");
     }
 
-    public EditSession(MapGameService mapGameService, CapitalCityService capitalCityService, GuessingGameService guessingGameService, WordsService wordsService){
+    public EditSession(MapGameService mapGameService, CapitalCityService capitalCityService, GuessingGameService guessingGameService, WordsService wordsService, SecurityService securityService){
         this.mapGameService = mapGameService;
         this.capitalCityService = capitalCityService;
         this.guessingGameService = guessingGameService;
         this.wordsService = wordsService;
+        this.securityService = securityService;
         initComponents();
         setHeaderTitle("Create Game");
     }
@@ -67,8 +74,6 @@ public class EditSession extends Dialog {
     private void initComponents(){
         setCloseOnEsc(false);
         setCloseOnOutsideClick(false);
-
-        binder = new Binder<>();
 
         var gameTypeSelect = new Select<String>();
         gameTypeSelect.setLabel("Game Type:");
@@ -91,6 +96,7 @@ public class EditSession extends Dialog {
         playerCountField = new IntegerField("Max. Player Count:");
         playerCountField.setValue(2);
         playerCountField.setMin(2);
+        playerCountField.setMax(20);
         playerCountField.setStepButtonsVisible(true);
         playerCountField.setSuffixComponent(VaadinIcon.GAMEPAD.create());
         playerCountField.setWidth(75f, Unit.PERCENTAGE);
@@ -105,14 +111,22 @@ public class EditSession extends Dialog {
         Tooltip.forComponent(checkBoxSpan).withText("Private?");
         checkBoxSpan.addClickListener(spanClickEvent -> isPrivateCheckbox.setValue(!isPrivateCheckbox.getValue()));
         isPrivateCheckbox.setLabelComponent(checkBoxSpan);
+        isPrivateCheckbox.addValueChangeListener(event -> {
+            passwordField.setVisible(event.getValue());
+        });
+
+        passwordField = getPasswordField();
+        passwordField.setVisible(false);
 
         binder = new Binder<>(Game.class);
         binder.forField(nameField).withValidator(s -> !s.isBlank(), "Cannot be empty")
                 .bind(Game::getGameName, Game::setGameName);
         binder.forField(playerCountField)
-                .withValidator(integer -> integer != null && integer > 1, "At least 2 players required")
+                .withValidator(integer -> integer != null && integer > 1 && integer < 21,
+                        "Player count has to be at least 2 and max 20.")
                 .bind(Game::getMaxPLayerCount, Game::setMaxPLayerCount);
         binder.forField(isPrivateCheckbox).bind(Game::isPrivate, Game::setPrivate);
+        binder.forField(passwordField).bind(Game::getPassword, Game::setPassword);
         binder.setBean(game);
 
         var notification = new Notification("", 5000, Notification.Position.BOTTOM_CENTER);
@@ -152,7 +166,11 @@ public class EditSession extends Dialog {
                         mapGame.setGameCapitalCity(capitalCities.get(0));
                         mapGame.setGameName(binder.getBean().getGameName());
                         mapGame.setMaxPLayerCount(binder.getBean().getMaxPLayerCount());
+                        mapGame.setOwner(securityService.getAuthenticatedUser().getUsername());
                         mapGame.setPrivate(binder.getBean().isPrivate());
+                        if (binder.getBean().isPrivate()){
+                            mapGame.setPassword(binder.getBean().getPassword());
+                        }
 
                         mapGameService.save(mapGame);
                     }
@@ -164,7 +182,11 @@ public class EditSession extends Dialog {
                         guessingGame.setCurrentWord(words.get(0));
                         guessingGame.setGameName(binder.getBean().getGameName());
                         guessingGame.setMaxPLayerCount(binder.getBean().getMaxPLayerCount());
+                        guessingGame.setOwner(securityService.getAuthenticatedUser().getUsername());
                         guessingGame.setPrivate(binder.getBean().isPrivate());
+                        if (binder.getBean().isPrivate()){
+                            guessingGame.setPassword(binder.getBean().getPassword());
+                        }
 
                         guessingGameService.save(guessingGame);
                     }
@@ -191,7 +213,7 @@ public class EditSession extends Dialog {
         var closeButton = new Button(VaadinIcon.CLOSE_BIG.create(), buttonClickEvent -> close());
         closeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
-        var verticalLayout = new VerticalLayout(gameTypeSelect, nameField, playerCountField, isPrivateCheckbox);
+        var verticalLayout = new VerticalLayout(gameTypeSelect, nameField, playerCountField, isPrivateCheckbox, passwordField);
         verticalLayout.setPadding(false);
         verticalLayout.setMargin(false);
 
@@ -199,5 +221,13 @@ public class EditSession extends Dialog {
         add(verticalLayout);
         getFooter().add(saveButton);
 
+    }
+
+    private PasswordField getPasswordField(){
+        var passwordField = new PasswordField();
+        passwordField.setRequired(true);
+        passwordField.setPrefixComponent(VaadinIcon.LOCK.create());
+        passwordField.focus();
+        return passwordField;
     }
 }

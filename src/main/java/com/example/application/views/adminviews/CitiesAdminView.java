@@ -1,7 +1,7 @@
-package com.example.application.views.masterdetail;
+package com.example.application.views.adminviews;
 
-import com.example.application.data.entity.SamplePerson;
-import com.example.application.data.service.SamplePersonService;
+import com.example.application.data.entity.CapitalCity;
+import com.example.application.data.service.CapitalCityService;
 import com.example.application.security.SecurityService;
 import com.example.application.views.MainLayout;
 import com.vaadin.collaborationengine.CollaborationAvatarGroup;
@@ -10,8 +10,6 @@ import com.vaadin.collaborationengine.UserInfo;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -21,9 +19,9 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -33,45 +31,42 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
 
-import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import java.util.Optional;
 import java.util.UUID;
 
-@PageTitle("Master Detail")
-@Route(value = "persons/:samplePersonID?/:action?(edit)", layout = MainLayout.class)
+@PageTitle("City Details")
+@Route(value = "cities/:cityID?/:action?(edit)", layout = MainLayout.class)
 @Uses(Icon.class)
-@PermitAll
-public class MasterDetailView extends Div implements BeforeEnterObserver {
+@RolesAllowed("ADMIN")
+public class CitiesAdminView extends Div implements BeforeEnterObserver {
 
-    private final String SAMPLEPERSON_ID = "samplePersonID";
-    private final String SAMPLEPERSON_EDIT_ROUTE_TEMPLATE = "persons/%s/edit";
+    private final String cityID = "cityID";
+    private final String CITY_EDIT_ROUTE_TEMPLATE = "cities/%s/edit";
 
-    private final Grid<SamplePerson> grid = new Grid<>(SamplePerson.class, false);
+    private final Grid<CapitalCity> grid = new Grid<>(CapitalCity.class, false);
 
     CollaborationAvatarGroup avatarGroup;
 
-    private TextField firstName;
-    private TextField lastName;
-    private TextField email;
-    private TextField phone;
-    private DatePicker dateOfBirth;
-    private TextField occupation;
-    private Checkbox important;
+    private TextField name;
+    private NumberField latitude;
+    private NumberField longitude;
 
     private final Button cancel = new Button("Cancel");
     private final Button save = new Button("Save");
+    private final Button delete = new Button("delete");
 
-    private final CollaborationBinder<SamplePerson> binder;
+    private final CollaborationBinder<CapitalCity> binder;
 
-    private SamplePerson samplePerson;
+    private CapitalCity capitalCity;
 
-    private final SamplePersonService samplePersonService;
+    private final CapitalCityService cityService;
     @NonNull
     private final SecurityService securityService;
 
     @Autowired
-    public MasterDetailView(SamplePersonService samplePersonService, SecurityService securityService) {
-        this.samplePersonService = samplePersonService;
+    public CitiesAdminView(CapitalCityService cityService, SecurityService securityService) {
+        this.cityService = cityService;
         this.securityService = securityService;
         addClassNames("master-detail-view");
 
@@ -86,6 +81,7 @@ public class MasterDetailView extends Div implements BeforeEnterObserver {
 
         // Create UI
         SplitLayout splitLayout = new SplitLayout();
+        splitLayout.setSplitterPosition(70);
 
         avatarGroup = new CollaborationAvatarGroup(userInfo, null);
         avatarGroup.getStyle().set("visibility", "hidden");
@@ -96,22 +92,11 @@ public class MasterDetailView extends Div implements BeforeEnterObserver {
         add(splitLayout);
 
         // Configure Grid
-        grid.addColumn("firstName").setAutoWidth(true);
-        grid.addColumn("lastName").setAutoWidth(true);
-        grid.addColumn("email").setAutoWidth(true);
-        grid.addColumn("phone").setAutoWidth(true);
-        grid.addColumn("dateOfBirth").setAutoWidth(true);
-        grid.addColumn("occupation").setAutoWidth(true);
-        LitRenderer<SamplePerson> importantRenderer = LitRenderer.<SamplePerson>of(
-                "<vaadin-icon icon='vaadin:${item.icon}' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: ${item.color};'></vaadin-icon>")
-                .withProperty("icon", important -> important.isImportant() ? "check" : "minus").withProperty("color",
-                        important -> important.isImportant()
-                                ? "var(--lumo-primary-text-color)"
-                                : "var(--lumo-disabled-text-color)");
+        grid.addColumn("name").setAutoWidth(true);
+        grid.addColumn("latitude").setAutoWidth(true);
+        grid.addColumn("longitude").setAutoWidth(true);
 
-        grid.addColumn(importantRenderer).setHeader("Important").setAutoWidth(true);
-
-        grid.setItems(query -> samplePersonService.list(
+        grid.setItems(query -> cityService.getAll(
                 PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
                 .stream());
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
@@ -119,15 +104,17 @@ public class MasterDetailView extends Div implements BeforeEnterObserver {
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
             if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(SAMPLEPERSON_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+                UI.getCurrent().navigate(String.format(CITY_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+                delete.setVisible(true);
             } else {
                 clearForm();
-                UI.getCurrent().navigate(MasterDetailView.class);
+                UI.getCurrent().navigate(CitiesAdminView.class);
+                delete.setVisible(false);
             }
         });
 
         // Configure Form
-        binder = new CollaborationBinder<>(SamplePerson.class, userInfo);
+        binder = new CollaborationBinder<>(CapitalCity.class, userInfo);
 
         // Bind fields. This is where you'd define e.g. validation rules
 
@@ -138,39 +125,47 @@ public class MasterDetailView extends Div implements BeforeEnterObserver {
             refreshGrid();
         });
 
+        delete.addClickListener(buttonClickEvent ->{
+            cityService.delete(this.capitalCity);
+            clearForm();
+            refreshGrid();
+        });
+
         save.addClickListener(e -> {
             try {
-                if (this.samplePerson == null) {
-                    this.samplePerson = new SamplePerson();
+                if (this.capitalCity == null) {
+                    this.capitalCity = new CapitalCity();
                 }
-                binder.writeBean(this.samplePerson);
+                binder.writeBean(this.capitalCity);
 
-                samplePersonService.update(this.samplePerson);
+                cityService.update(this.capitalCity);
                 clearForm();
                 refreshGrid();
-                Notification.show("SamplePerson details stored.");
-                UI.getCurrent().navigate(MasterDetailView.class);
+                Notification.show("City details stored.");
+                UI.getCurrent().navigate(CitiesAdminView.class);
             } catch (ValidationException validationException) {
-                Notification.show("An exception happened while trying to store the samplePerson details.");
+                Notification.show("An exception happened while trying to store the city details.");
             }
         });
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Optional<UUID> samplePersonId = event.getRouteParameters().get(SAMPLEPERSON_ID).map(UUID::fromString);
-        if (samplePersonId.isPresent()) {
-            Optional<SamplePerson> samplePersonFromBackend = samplePersonService.get(samplePersonId.get());
-            if (samplePersonFromBackend.isPresent()) {
-                populateForm(samplePersonFromBackend.get());
+        Optional<UUID> cityId = event.getRouteParameters().get(cityID).map(UUID::fromString);
+        if (cityId.isPresent()) {
+            Optional<CapitalCity> capitalCityFromBackend = cityService.get(cityId.get());
+            if (capitalCityFromBackend.isPresent()) {
+                populateForm(capitalCityFromBackend.get());
+                delete.setVisible(true);
             } else {
                 Notification.show(
-                        String.format("The requested samplePerson was not found, ID = %d", samplePersonId.get()), 3000,
+                        String.format("The requested city was not found, ID = %d", cityId.get()), 3000,
                         Notification.Position.BOTTOM_START);
                 // when a row is selected but the data is no longer available,
                 // refresh grid
                 refreshGrid();
-                event.forwardTo(MasterDetailView.class);
+                delete.setVisible(false);
+                event.forwardTo(CitiesAdminView.class);
             }
         }
     }
@@ -184,14 +179,11 @@ public class MasterDetailView extends Div implements BeforeEnterObserver {
         editorLayoutDiv.add(editorDiv);
 
         FormLayout formLayout = new FormLayout();
-        firstName = new TextField("First Name");
-        lastName = new TextField("Last Name");
-        email = new TextField("Email");
-        phone = new TextField("Phone");
-        dateOfBirth = new DatePicker("Date Of Birth");
-        occupation = new TextField("Occupation");
-        important = new Checkbox("Important");
-        formLayout.add(firstName, lastName, email, phone, dateOfBirth, occupation, important);
+        name = new TextField("City");
+        longitude = new NumberField("Latitude");
+        latitude = new NumberField("Longitude");
+
+        formLayout.add(name, longitude, latitude);
 
         editorDiv.add(avatarGroup, formLayout);
         createButtonLayout(editorLayoutDiv);
@@ -204,7 +196,9 @@ public class MasterDetailView extends Div implements BeforeEnterObserver {
         buttonLayout.setClassName("button-layout");
         cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        buttonLayout.add(save, cancel);
+        delete.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
+        delete.setVisible(false);
+        buttonLayout.add(save, cancel, delete);
         editorLayoutDiv.add(buttonLayout);
     }
 
@@ -224,16 +218,16 @@ public class MasterDetailView extends Div implements BeforeEnterObserver {
         populateForm(null);
     }
 
-    private void populateForm(SamplePerson value) {
-        this.samplePerson = value;
+    private void populateForm(CapitalCity value) {
+        this.capitalCity = value;
         String topic = null;
-        if (this.samplePerson != null && this.samplePerson.getId() != null) {
-            topic = "samplePerson/" + this.samplePerson.getId();
+        if (this.capitalCity != null && this.capitalCity.getId() != null) {
+            topic = "cities/" + this.capitalCity.getId();
             avatarGroup.getStyle().set("visibility", "visible");
         } else {
             avatarGroup.getStyle().set("visibility", "hidden");
         }
-        binder.setTopic(topic, () -> this.samplePerson);
+        binder.setTopic(topic, () -> this.capitalCity);
         avatarGroup.setTopic(topic);
 
     }

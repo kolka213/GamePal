@@ -3,7 +3,6 @@ package com.example.application.data.service;
 import com.example.application.data.entity.MapGame;
 import com.example.application.data.entity.Players;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,7 +17,7 @@ public class MapGameService {
     private final PlayersService playersService;
 
     @Autowired
-    public MapGameService(MapGameRepository repository, PlayersService playersService, ApplicationEventPublisher eventPublisher) {
+    public MapGameService(MapGameRepository repository, PlayersService playersService) {
         this.repository = repository;
         this.playersService = playersService;
     }

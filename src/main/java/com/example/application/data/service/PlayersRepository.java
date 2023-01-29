@@ -12,4 +12,5 @@ public interface PlayersRepository extends JpaRepository<Players, UUID> {
 
     List<Players> findAllByMapGame(MapGame mapGame);
     List<Players> findAllByGuessingGame(GuessingGame guessingGame);
+    Players findByPlayerName(String playerName);
 }
