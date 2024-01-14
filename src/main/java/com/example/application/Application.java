@@ -4,6 +4,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.server.PWA;
+import com.vaadin.flow.server.ServiceInitEvent;
+import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.theme.Theme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -24,10 +26,16 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @NpmPackage(value = "line-awesome", version = "1.3.0")
 @NpmPackage(value = "@vaadin-component-factory/vcf-nav", version = "1.0.6")
 @EnableScheduling
-public class Application extends SpringBootServletInitializer implements AppShellConfigurator {
+public class Application extends SpringBootServletInitializer implements AppShellConfigurator, VaadinServiceInitListener {
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
+
+    @Override
+    public void serviceInit(ServiceInitEvent serviceInitEvent) {
+
+    }
+
 
 }
