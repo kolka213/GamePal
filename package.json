@@ -220,6 +220,7 @@
     "@vaadin/vaadin-list-mixin": "$@vaadin/vaadin-list-mixin",
     "@vaadin/vaadin-login": "$@vaadin/vaadin-login",
     "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
+    "@vaadin/vaadin-material-styles": "$@vaadin/vaadin-material-styles",
     "@vaadin/vaadin-menu-bar": "$@vaadin/vaadin-menu-bar",
     "@vaadin/vaadin-messages": "$@vaadin/vaadin-messages",
     "@vaadin/vaadin-notification": "$@vaadin/vaadin-notification",
@@ -258,10 +259,9 @@
     "lit": "$lit",
     "@polymer/polymer": "$@polymer/polymer",
     "proj4": "$proj4",
-    "date-fns": "$date-fns",
-    "@vaadin/vaadin-material-styles": "$@vaadin/vaadin-material-styles",
     "line-awesome": "$line-awesome",
-    "@vaadin-component-factory/vcf-nav": "$@vaadin-component-factory/vcf-nav"
+    "@vaadin-component-factory/vcf-nav": "$@vaadin-component-factory/vcf-nav",
+    "date-fns": "$date-fns"
   },
   "vaadin": {
     "dependencies": {
