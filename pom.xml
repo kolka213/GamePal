@@ -235,7 +235,8 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <nodeVersion>v20.11.0</nodeVersion>
+                            <nodeVersion>v16.20.2</nodeVersion>
+                            <npmVersion>8.19.4</npmVersion>
                         </configuration>
                     </plugin>
                 </plugins>
