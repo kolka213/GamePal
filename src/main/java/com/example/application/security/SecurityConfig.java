@@ -83,7 +83,7 @@ public class SecurityConfig extends VaadinWebSecurity {
                     logger.info("Vaadin Collaboration Kit license needs to be updated: %s".formatted(
                             licenseEvent.getMessage()));
                 });
-        configuration.setDataDir("projects/651755147298/secrets/collaboration-kit-license");
+        configuration.setDataDir("projects/651755147298/secrets/ce-license");
         return configuration;
     }
 }
