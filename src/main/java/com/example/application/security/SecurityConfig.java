@@ -33,8 +33,44 @@ public class SecurityConfig extends VaadinWebSecurity {
      */
     private static class SimpleInMemoryUserDetailsManager extends InMemoryUserDetailsManager {
         public SimpleInMemoryUserDetailsManager() {
-            createUser(new User("user",
-                    "{noop}password",
+            createUser(new User("user1",
+                    "{noop}user1",
+                    Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"))
+            ));
+            createUser(new User("user2",
+                    "{noop}user2",
+                    Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"))
+            ));
+            createUser(new User("user3",
+                    "{noop}user3",
+                    Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"))
+            ));
+            createUser(new User("user4",
+                    "{noop}user4",
+                    Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"))
+            ));
+            createUser(new User("user5",
+                    "{noop}user5",
+                    Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"))
+            ));
+            createUser(new User("user6",
+                    "{noop}user6",
+                    Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"))
+            ));
+            createUser(new User("user7",
+                    "{noop}user7",
+                    Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"))
+            ));
+            createUser(new User("user8",
+                    "{noop}user8",
+                    Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"))
+            ));
+            createUser(new User("user9",
+                    "{noop}user9",
+                    Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"))
+            ));
+            createUser(new User("user10",
+                    "{noop}user10",
                     Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"))
             ));
             createUser(new User("admin",
